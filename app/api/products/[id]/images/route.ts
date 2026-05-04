@@ -6,7 +6,7 @@ import { processAndSaveImage, validateImageFile } from '@/lib/image-utils';
 function isSafeImageUrl(value: string) {
   try {
     const url = new URL(value);
-    return ['http:', 'https:'].includes(url.protocol) && /\.(avif|gif|jpe?g|png|webp)(\?.*)?$/i.test(url.pathname + url.search);
+    return ['http:', 'https:'].includes(url.protocol);
   } catch {
     return false;
   }
