@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #0d0d0d;
+  --bg-secondary: #141414;
+  --bg-card: #1a1a1a;
+  --border: #2a2a2a;
+  --accent: #C8952A;
+  --accent-hover: #d4a53a;
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+}
+
+body {
+  color: var(--text-primary);
+  background: var(--bg-primary);
+}
+
+.bg-dot-grid {
+  background-image: radial-gradient(circle, #2a2a2a 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

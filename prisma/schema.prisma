@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SiteConfig {
+  id                    Int      @id @default(1)
+  siteName              String   @default("SHOWROOM JR")
+  siteSlogan            String?
+  logoUrl               String?
+  faviconUrl            String?
+  primaryColor          String   @default("#0d0d0d")
+  secondaryColor        String   @default("#C8952A")
+  whatsappNumber        String?
+  whatsappMessage       String?
+  whatsappButtonText    String   @default("Consultar por WhatsApp")
+  whatsappButtonEnabled Boolean  @default(true)
+  heroTitle             String?
+  heroSubtitle          String?
+  heroImageUrl          String?
+  bannerImageUrl        String?
+  twitterHandle         String?
+  instagramHandle       String?
+  facebookUrl           String?
+  metaTitle             String?
+  metaDescription       String?
+  metaKeywords          String?
+  footerText            String?
+  showProductCount      Boolean  @default(true)
+  showCategoryCount     Boolean  @default(true)
+  shippingBadge         String?
+  warrantyBadge         String?
+  returnsBadge          String?
+  supportBadge          String?
+  currencySymbol        String   @default("$")
+  currencyCode          String   @default("ARS")
+  maintenanceMode       Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  active      Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id                      String         @id @default(uuid())
+  name                    String
+  slug                    String         @unique
+  description             String?
+  shortDescription        String?
+  price                   Decimal
+  compareAtPrice          Decimal?
+  categoryId              String
+  category                Category       @relation(fields: [categoryId], references: [id])
+  featured                Boolean        @default(false)
+  active                  Boolean        @default(true)
+  stock                   Int            @default(0)
+  sortOrder               Int            @default(0)
+  viewCount               Int            @default(0)
+  whatsappMessageOverride String?
+  images                  ProductImage[]
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+}
+
+enum ImageSourceType {
+  UPLOAD
+  URL
+}
+
+model ProductImage {
+  id         String          @id @default(uuid())
+  productId  String
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url        String
+  altText    String?
+  sourceType ImageSourceType @default(UPLOAD)
+  localPath  String?
+  isPrimary  Boolean         @default(false)
+  sortOrder  Int             @default(0)
+  createdAt  DateTime        @default(now())
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  EDITOR
+}
+
+model AdminUser {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String?
+  role      AdminRole @default(EDITOR)
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+}
+
+enum BannerPosition {
+  HERO
+  MIDDLE
+  FOOTER
+  SIDEBAR
+}
+
+model Banner {
+  id        String         @id @default(uuid())
+  title     String
+  imageUrl  String
+  linkUrl   String?
+  linkText  String?
+  position  BannerPosition @default(HERO)
+  active    Boolean        @default(true)
+  sortOrder Int            @default(0)
+  startDate DateTime?
+  endDate   DateTime?
+}
