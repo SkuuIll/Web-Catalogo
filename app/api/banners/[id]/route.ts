@@ -1,29 +1,33 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession } from '@/lib/api-utils';
+import { bannerUpdateSchema, zodErrorMessage } from '@/lib/validation';
 
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
-    const data = await request.json();
+    const parsed = bannerUpdateSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: zodErrorMessage(parsed.error) }, { status: 400 });
+    }
+    const data = parsed.data;
     const banner = await prisma.banner.update({
       where: { id: params.id },
       data: {
         title: data.title,
         imageUrl: data.imageUrl,
-        linkUrl: data.linkUrl,
-        linkText: data.linkText,
+        linkUrl: data.linkUrl || null,
+        linkText: data.linkText || null,
         position: data.position,
         active: data.active,
         sortOrder: data.sortOrder,
-        startDate: data.startDate ? new Date(data.startDate) : null,
-        endDate: data.endDate ? new Date(data.endDate) : null,
+        startDate: data.startDate,
+        endDate: data.endDate,
       },
     });
     return NextResponse.json(banner);
@@ -37,7 +41,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
     await prisma.banner.delete({ where: { id: params.id } });

@@ -1,27 +1,60 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { formatPriceARS } from '@/lib/price-formatter'
-import { Plus, Search, Edit2, Trash2, Eye, EyeOff, Star, AlertTriangle, Copy } from 'lucide-react'
+import { Plus, Search, Edit2, Trash2, Eye, EyeOff, Star, AlertTriangle, Copy, ChevronLeft, ChevronRight, Filter } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [categoryId, setCategoryId] = useState('')
+  const [stockFilter, setStockFilter] = useState('')
+  const [sort, setSort] = useState('newest')
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
   const [deleting, setDeleting] = useState<string | null>(null)
   const { success, error: toastError } = useToast()
   const confirm = useConfirm()
+  const PAGE_SIZE = 15
 
-  const loadProducts = () => {
-    fetch('/api/products?includeInactive=true')
+  const loadProducts = useCallback(() => {
+    setLoading(true)
+    const params = new URLSearchParams({
+      includeInactive: 'true',
+      paginated: 'true',
+      page: String(page),
+      pageSize: String(PAGE_SIZE),
+      sort,
+    })
+    if (search) params.set('search', search)
+    if (statusFilter) params.set('status', statusFilter)
+    if (categoryId) params.set('categoryId', categoryId)
+    if (stockFilter === 'inStock') params.set('inStock', 'true')
+    if (stockFilter === 'outOfStock') params.set('stock', 'outOfStock')
+    fetch(`/api/products?${params}`)
       .then(r => r.json())
-      .then(data => { setProducts(Array.isArray(data) ? data : []); setLoading(false) })
+      .then(data => {
+        const items = Array.isArray(data) ? data : data.items || []
+        setProducts(items)
+        setTotal(Array.isArray(data) ? items.length : data.total || 0)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
-  }
+  }, [page, sort, search, statusFilter, categoryId, stockFilter])
 
-  useEffect(() => { loadProducts() }, [])
+  useEffect(() => {
+    fetch('/api/categories').then(r => r.json()).then(data => setCategories(Array.isArray(data) ? data : [])).catch(() => undefined)
+  }, [])
+
+  useEffect(() => {
+    const timeout = window.setTimeout(loadProducts, search ? 250 : 0)
+    return () => window.clearTimeout(timeout)
+  }, [search, statusFilter, categoryId, stockFilter, sort, page, loadProducts])
 
   const handleDeactivate = async (product: any) => {
     const ok = await confirm({
@@ -70,10 +103,7 @@ export default function AdminProductsPage() {
     }
   }
 
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    (p.category?.name || '').toLowerCase().includes(search.toLowerCase())
-  )
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   if (loading) return <div className="p-10 text-center text-text-secondary">Cargando productos...</div>
 
@@ -92,24 +122,53 @@ export default function AdminProductsPage() {
         </Link>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-6">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Buscar por nombre o categoría..."
-          className="w-full bg-card border border-border rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder:text-text-secondary focus:border-accent focus:outline-none transition-colors"
-        />
+      <div className="mb-6 rounded-lg border border-border bg-card p-4">
+        <div className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
+          <Filter className="h-4 w-4 text-accent" />
+          Filtros y orden
+        </div>
+        <div className="grid gap-3 md:grid-cols-[1fr_170px_180px_150px_170px]">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+            <input
+              type="text"
+              value={search}
+              onChange={e => { setSearch(e.target.value); setPage(1) }}
+              placeholder="Buscar por nombre, marca o detalle..."
+              className="h-11 w-full bg-secondary border border-border rounded-lg pl-11 pr-4 text-sm text-white placeholder:text-text-secondary focus:border-accent focus:outline-none transition-colors"
+            />
+          </div>
+          <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1) }} className="h-11 rounded-lg border border-border bg-secondary px-3 text-sm text-white outline-none focus:border-accent">
+            <option value="">Todos los estados</option>
+            <option value="PUBLISHED">Publicados</option>
+            <option value="PAUSED">Pausados</option>
+            <option value="DRAFT">Borradores</option>
+          </select>
+          <select value={categoryId} onChange={e => { setCategoryId(e.target.value); setPage(1) }} className="h-11 rounded-lg border border-border bg-secondary px-3 text-sm text-white outline-none focus:border-accent">
+            <option value="">Todas las categorías</option>
+            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          <select value={stockFilter} onChange={e => { setStockFilter(e.target.value); setPage(1) }} className="h-11 rounded-lg border border-border bg-secondary px-3 text-sm text-white outline-none focus:border-accent">
+            <option value="">Todo stock</option>
+            <option value="inStock">Con stock</option>
+            <option value="outOfStock">Agotados</option>
+          </select>
+          <select value={sort} onChange={e => { setSort(e.target.value); setPage(1) }} className="h-11 rounded-lg border border-border bg-secondary px-3 text-sm text-white outline-none focus:border-accent">
+            <option value="newest">Más nuevos</option>
+            <option value="name_asc">Nombre A-Z</option>
+            <option value="price_asc">Precio menor</option>
+            <option value="price_desc">Precio mayor</option>
+            <option value="stock_asc">Menor stock</option>
+          </select>
+        </div>
       </div>
 
       <div className="md:hidden space-y-3">
-        {filtered.length === 0 ? (
+        {products.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center text-text-secondary">
             {search ? 'Sin resultados para tu búsqueda.' : 'No hay productos registrados.'}
           </div>
-        ) : filtered.map((product) => (
+        ) : products.map((product) => (
           <div key={product.id} className="rounded-lg border border-border bg-card p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -176,13 +235,13 @@ export default function AdminProductsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filtered.length === 0 ? (
+              {products.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-text-secondary">
                     {search ? 'Sin resultados para tu búsqueda.' : 'No hay productos registrados.'}
                   </td>
                 </tr>
-              ) : filtered.map((product) => (
+              ) : products.map((product) => (
                 <tr key={product.id} className="hover:bg-secondary/40 transition-colors">
                   <td className="p-4">
                     <div className="flex items-center gap-2">
@@ -259,6 +318,24 @@ export default function AdminProductsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-text-secondary">
+          Mostrando {products.length} de {total} productos.
+        </p>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1 || loading} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-3 text-sm font-bold text-text-secondary hover:text-white disabled:opacity-40">
+            <ChevronLeft className="h-4 w-4" />
+            Anterior
+          </button>
+          <span className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-bold text-white">
+            {page} / {totalPages}
+          </span>
+          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages || loading} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-3 text-sm font-bold text-text-secondary hover:text-white disabled:opacity-40">
+            Siguiente
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </div>

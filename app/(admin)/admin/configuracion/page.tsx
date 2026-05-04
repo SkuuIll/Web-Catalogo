@@ -39,7 +39,7 @@ export default function ConfigPage() {
   const { success, error: toastError } = useToast()
 
   useEffect(() => {
-    fetch('/api/config').then(r => r.json()).then(data => { setConfig(data); setLoading(false) }).catch(() => setLoading(false))
+    fetch('/api/config?admin=true').then(r => r.json()).then(data => { setConfig(data); setLoading(false) }).catch(() => setLoading(false))
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -51,8 +51,9 @@ export default function ConfigPage() {
     setSaving(true)
     setSaved(false)
     try {
-      const res = await fetch('/api/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) })
-      if (res.ok) { setSaved(true); success('Configuración guardada correctamente.'); setTimeout(() => setSaved(false), 3000) }
+      const { aiApiKeyConfigured, ...payload } = config
+      const res = await fetch('/api/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      if (res.ok) { const data = await res.json(); setConfig(data); setSaved(true); success('Configuración guardada correctamente.'); setTimeout(() => setSaved(false), 3000) }
       else toastError('Error al guardar configuración.')
     } catch { toastError('Error al guardar configuración.') }
     finally { setSaving(false) }
@@ -89,6 +90,7 @@ export default function ConfigPage() {
       setUploading(true)
       const fd = new FormData()
       fd.append('file', file)
+      fd.append('folder', 'site')
       try {
         const res = await fetch('/api/upload', { method: 'POST', body: fd })
         const data = await res.json()
@@ -322,7 +324,7 @@ export default function ConfigPage() {
                   <option value="OPENROUTER">OpenRouter</option>
                 </select>
               </div>
-              <Field label="API Key de IA" name="aiApiKey" type="password" placeholder="Pegá la API key del proveedor elegido" />
+              <Field label="API Key de IA" name="aiApiKey" type="password" placeholder={config?.aiApiKeyConfigured ? 'Ya hay una API key guardada. Pegá otra solo si querés reemplazarla.' : 'Pegá la API key del proveedor elegido'} help={config?.aiApiKeyConfigured ? 'Por seguridad, la API key guardada no se muestra en pantalla.' : undefined} />
             </div>
             <div className="rounded-lg border border-accent/20 bg-accent/10 p-4 text-sm text-text-secondary">
               <p className="font-semibold text-accent">Qué genera la IA</p>

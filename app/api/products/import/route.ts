@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession, slugify } from '@/lib/api-utils';
 
 function splitCsvLine(line: string) {
   const values: string[] = [];
@@ -26,20 +25,18 @@ function splitCsvLine(line: string) {
   return values;
 }
 
-function slugify(value: string) {
-  return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-}
-
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await requireAdminSession();
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
   const formData = await request.formData();
   const file = formData.get('file');
   if (!(file instanceof File)) return NextResponse.json({ error: 'Archivo CSV requerido' }, { status: 400 });
+  if (file.size > 2 * 1024 * 1024) return NextResponse.json({ error: 'CSV demasiado grande. Máximo 2MB.' }, { status: 400 });
 
   const text = await file.text();
   const lines = text.split(/\r?\n/).filter(Boolean);
+  if (lines.length > 1001) return NextResponse.json({ error: 'El CSV puede tener hasta 1000 productos por importación.' }, { status: 400 });
   const headers = splitCsvLine(lines[0] || '').map(h => h.trim());
   let count = 0;
 
@@ -47,7 +44,9 @@ export async function POST(request: Request) {
     const values = splitCsvLine(line);
     const row: Record<string, string> = {};
     headers.forEach((header, index) => { row[header] = values[index] || ''; });
-    if (!row.name || !row.price || !row.category) continue;
+    const price = Number(row.price);
+    const stock = Number(row.stock || 0);
+    if (!row.name || !Number.isFinite(price) || !row.category) continue;
 
     const category = await prisma.category.upsert({
       where: { slug: slugify(row.category) },
@@ -58,8 +57,8 @@ export async function POST(request: Request) {
     await prisma.product.upsert({
       where: { slug: row.slug || slugify(row.name) },
       update: {
-        price: Number(row.price),
-        stock: Number(row.stock || 0),
+        price,
+        stock: Number.isFinite(stock) ? Math.max(0, Math.floor(stock)) : 0,
         active: row.active !== 'false',
         status: row.status || 'PUBLISHED',
       },
@@ -67,9 +66,9 @@ export async function POST(request: Request) {
         name: row.name,
         slug: row.slug || slugify(row.name),
         categoryId: category.id,
-        price: Number(row.price),
+        price,
         compareAtPrice: row.compareAtPrice ? Number(row.compareAtPrice) : null,
-        stock: Number(row.stock || 0),
+        stock: Number.isFinite(stock) ? Math.max(0, Math.floor(stock)) : 0,
         status: row.status || 'PUBLISHED',
         active: row.active !== 'false',
         featured: row.featured === 'true',

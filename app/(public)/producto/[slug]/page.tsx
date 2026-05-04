@@ -1,13 +1,14 @@
 import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { formatPriceARS } from '@/lib/price-formatter';
 import { ArrowLeft, ShieldCheck, Truck, Ruler, Palette, BadgeCheck, Wrench } from 'lucide-react';
 import { generateProductWhatsAppMessage } from '@/lib/whatsapp';
 import { ProductCard } from '@/components/shop/ProductCard';
 import { WhatsAppTrackedLink } from '@/components/shop/WhatsAppTrackedLink';
+import { ProductGallery } from '@/components/shop/ProductGallery';
+import { headers } from 'next/headers';
 import type { Metadata } from 'next';
 
 export const revalidate = 60;
@@ -41,6 +42,14 @@ export default async function ProductoPage({ params }: { params: { slug: string 
   if (!product) {
     notFound();
   }
+  if (!product.active || product.status !== 'PUBLISHED') {
+    notFound();
+  }
+
+  await prisma.product.update({
+    where: { id: product.id },
+    data: { viewCount: { increment: 1 } },
+  }).catch(() => undefined);
 
   const relatedProducts = await prisma.product.findMany({
     where: {
@@ -56,9 +65,14 @@ export default async function ProductoPage({ params }: { params: { slug: string 
   const price = formatPriceARS(Number(product.price));
   const primaryImage = product.images?.find((img: any) => img.isPrimary) || product.images?.[0];
   const imageUrl = primaryImage ? primaryImage.url : '/placeholder.png';
+  const requestHeaders = headers();
+  const protocol = requestHeaders.get('x-forwarded-proto') || 'http';
+  const host = requestHeaders.get('x-forwarded-host') || requestHeaders.get('host') || 'localhost:3000';
+  const productUrl = `${protocol}://${host}/producto/${product.slug}`;
+  const absoluteImageUrl = imageUrl.startsWith('http') ? imageUrl : `${protocol}://${host}${imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`}`;
 
   const cleanNumber = config?.whatsappNumber?.replace(/\D/g, '') || '';
-  const message = generateProductWhatsAppMessage(product.name, product.price, config?.whatsappMessage ?? undefined, product.whatsappMessageOverride);
+  const message = generateProductWhatsAppMessage(product.name, product.price, config?.whatsappMessage ?? undefined, product.whatsappMessageOverride, productUrl);
   const encodedMessage = encodeURIComponent(message);
   const waUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
   const attributeGroups = [
@@ -68,9 +82,29 @@ export default async function ProductoPage({ params }: { params: { slug: string 
     { label: 'Colores', value: product.colors, icon: Palette },
     { label: 'Detalles', value: product.specs, icon: Wrench },
   ].filter(item => item.value);
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.metaDescription || product.shortDescription || product.description || undefined,
+    image: imageUrl ? [absoluteImageUrl] : undefined,
+    brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+    category: product.category.name,
+    offers: {
+      '@type': 'Offer',
+      url: productUrl,
+      priceCurrency: config?.currencyCode || 'ARS',
+      price: Number(product.price),
+      availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    },
+  };
 
   return (
     <div className="min-h-screen bg-bg-primary pt-20 md:pt-24 pb-24 md:pb-20 px-4">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <div className="container mx-auto max-w-6xl">
         <Link href="/catalogo" className="inline-flex items-center gap-2 text-text-secondary hover:text-accent mb-8 transition-colors group">
           <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
@@ -80,21 +114,13 @@ export default async function ProductoPage({ params }: { params: { slug: string 
         <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-lg overflow-hidden shadow-2xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-0">
             {/* Image Gallery Area */}
-            <div className="relative aspect-square lg:aspect-auto lg:h-full bg-secondary/30 p-4 sm:p-8 flex items-center justify-center border-b lg:border-b-0 lg:border-r border-white/10">
+            <div className="relative min-w-0 bg-secondary/30 p-4 sm:p-6 flex items-center justify-center border-b lg:border-b-0 lg:border-r border-white/10">
               <div className="absolute top-6 left-6 z-10">
                 <span className="px-4 py-1.5 rounded-full bg-accent/20 border border-accent/30 text-accent font-bold text-xs uppercase tracking-wider shadow-lg">
                   {product.category.name}
                 </span>
               </div>
-              <div className="relative w-full h-full max-w-md max-h-md">
-                <Image 
-                  src={imageUrl} 
-                  alt={product.name} 
-                  fill 
-                  className="object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500 ease-out" 
-                  sizes="(max-width: 768px) 100vw, 50vw" 
-                />
-              </div>
+              <ProductGallery images={product.images} productName={product.name} />
             </div>
 
             {/* Product Info Area */}
@@ -193,7 +219,7 @@ export default async function ProductoPage({ params }: { params: { slug: string 
                 Ver categoría
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
               {relatedProducts.map((related) => (
                 <ProductCard key={related.id} product={related} config={config} />
               ))}

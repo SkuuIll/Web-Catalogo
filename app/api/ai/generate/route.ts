@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession } from '@/lib/api-utils';
 
 type GeneratedProductCopy = {
   shortDescription: string;
@@ -91,7 +90,7 @@ async function readError(response: Response) {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
     const { name, categoryName, price, stock, brand, model, sizes, colors, specs } = await request.json();

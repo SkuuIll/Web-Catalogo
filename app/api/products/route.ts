@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { paginatedResponse, parsePagination, requireAdminSession, slugify } from '@/lib/api-utils';
+import { productCreateSchema, zodErrorMessage } from '@/lib/validation';
 
 export async function GET(request: Request) {
   try {
@@ -15,9 +15,17 @@ export async function GET(request: Request) {
     const size = searchParams.get('size');
     const color = searchParams.get('color');
     const inStock = searchParams.get('inStock') === 'true';
+    const stock = searchParams.get('stock');
     const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
     const status = searchParams.get('status');
+    const paginated = searchParams.get('paginated') === 'true';
+    const adminOnlyQuery = includeInactive || Boolean(status);
+    const session = adminOnlyQuery ? await requireAdminSession() : null;
+
+    if (adminOnlyQuery && !session) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
 
     let whereClause: any = includeInactive ? {} : { active: true, status: 'PUBLISHED' };
     if (categoryId) whereClause.categoryId = categoryId;
@@ -27,10 +35,13 @@ export async function GET(request: Request) {
     if (size) whereClause.sizes = { contains: size };
     if (color) whereClause.colors = { contains: color };
     if (inStock) whereClause.stock = { gt: 0 };
+    if (stock === 'outOfStock') whereClause.stock = { lte: 0 };
     if (minPrice || maxPrice) {
       whereClause.price = {};
-      if (minPrice) whereClause.price.gte = Number(minPrice);
-      if (maxPrice) whereClause.price.lte = Number(maxPrice);
+      const parsedMin = Number(minPrice);
+      const parsedMax = Number(maxPrice);
+      if (Number.isFinite(parsedMin)) whereClause.price.gte = parsedMin;
+      if (Number.isFinite(parsedMax)) whereClause.price.lte = parsedMax;
     }
 
     // SQLite-compatible search (no mode:'insensitive', use contains only)
@@ -49,16 +60,27 @@ export async function GET(request: Request) {
     if (sort === 'price_desc') orderByClause = { price: 'desc' };
     if (sort === 'newest') orderByClause = { createdAt: 'desc' };
     if (sort === 'featured') orderByClause = { featured: 'desc' };
+    if (sort === 'stock_asc') orderByClause = { stock: 'asc' };
+    if (sort === 'name_asc') orderByClause = { name: 'asc' };
 
-    const products = await prisma.product.findMany({
-      where: whereClause,
-      orderBy: orderByClause,
-      include: {
-        category: true,
-        images: { orderBy: { sortOrder: 'asc' } },
-      },
-    });
+    const pagination = parsePagination(searchParams);
 
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where: whereClause,
+        orderBy: orderByClause,
+        include: {
+          category: true,
+          images: { orderBy: { sortOrder: 'asc' } },
+        },
+        ...(paginated ? { skip: pagination.skip, take: pagination.take } : {}),
+      }),
+      paginated ? prisma.product.count({ where: whereClause }) : Promise.resolve(0),
+    ]);
+
+    if (paginated) {
+      return NextResponse.json(paginatedResponse(products, total, pagination.page, pagination.pageSize));
+    }
     return NextResponse.json(products);
   } catch (error) {
     return NextResponse.json({ error: 'Error al obtener productos' }, { status: 500 });
@@ -67,22 +89,16 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
-    const data = await request.json();
-
-    // Validate required fields
-    if (!data.name || !data.price || !data.categoryId) {
-      return NextResponse.json({ error: 'Nombre, precio y categoría son requeridos' }, { status: 400 });
+    const parsed = productCreateSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: zodErrorMessage(parsed.error) }, { status: 400 });
     }
 
-    // Auto-generate slug if missing
-    const slug = data.slug || data.name
-      .toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+    const data = parsed.data;
+    const slug = data.slug ? slugify(data.slug) : slugify(data.name);
 
     const product = await prisma.product.create({
       data: {
@@ -95,13 +111,13 @@ export async function POST(request: Request) {
         sizes: data.sizes || null,
         colors: data.colors || null,
         specs: data.specs || null,
-        price: parseFloat(data.price),
-        compareAtPrice: data.compareAtPrice ? parseFloat(data.compareAtPrice) : null,
+        price: data.price,
+        compareAtPrice: data.compareAtPrice || null,
         status: data.status || (data.active === false ? 'PAUSED' : 'PUBLISHED'),
         categoryId: data.categoryId,
         featured: data.featured || false,
         active: data.active ?? true,
-        stock: parseInt(data.stock, 10) || 0,
+        stock: data.stock || 0,
         whatsappMessageOverride: data.whatsappMessageOverride || null,
         metaTitle: data.metaTitle || null,
         metaDescription: data.metaDescription || null,

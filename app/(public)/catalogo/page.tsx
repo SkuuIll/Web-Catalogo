@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { ProductCard } from '@/components/shop/ProductCard'
 import { FeaturedProductCard } from '@/components/shop/FeaturedProductCard'
 import { Search, SlidersHorizontal, X, ChevronDown, Sparkles, PackageCheck } from 'lucide-react'
@@ -9,7 +9,9 @@ export default function CatalogoPage() {
   const [products, setProducts] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [filtersReady, setFiltersReady] = useState(false)
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [sort, setSort] = useState('newest')
   const [brand, setBrand] = useState('')
@@ -20,9 +22,25 @@ export default function CatalogoPage() {
   const [maxPrice, setMaxPrice] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const requestSeq = useRef(0)
   const PER_PAGE = 12
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const initialSearch = params.get('search') || ''
+    setSearch(initialSearch)
+    setDebouncedSearch(initialSearch)
+    setCategoryId(params.get('categoryId') || '')
+    setSort(params.get('sort') || 'newest')
+    setBrand(params.get('brand') || '')
+    setSize(params.get('size') || '')
+    setColor(params.get('color') || '')
+    setInStock(params.get('inStock') === 'true')
+    setMinPrice(params.get('minPrice') || '')
+    setMaxPrice(params.get('maxPrice') || '')
+    setFiltersReady(true)
+
     Promise.all([
       fetch('/api/config').then(r => r.json()),
       fetch('/api/categories').then(r => r.json()),
@@ -33,9 +51,24 @@ export default function CatalogoPage() {
   }, [])
 
   useEffect(() => {
+    const timeout = window.setTimeout(() => setDebouncedSearch(search), 300)
+    return () => window.clearTimeout(timeout)
+  }, [search])
+
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch, categoryId, sort, brand, size, color, inStock, minPrice, maxPrice])
+
+  useEffect(() => {
+    if (!filtersReady) return
+    const requestId = requestSeq.current + 1
+    requestSeq.current = requestId
     setLoading(true)
     const params = new URLSearchParams()
-    if (search) params.set('search', search)
+    params.set('paginated', 'true')
+    params.set('page', String(page))
+    params.set('pageSize', String(PER_PAGE))
+    if (debouncedSearch) params.set('search', debouncedSearch)
     if (categoryId) params.set('categoryId', categoryId)
     if (sort) params.set('sort', sort)
     if (brand) params.set('brand', brand)
@@ -45,21 +78,32 @@ export default function CatalogoPage() {
     if (minPrice) params.set('minPrice', minPrice)
     if (maxPrice) params.set('maxPrice', maxPrice)
 
-    fetch(`/api/products?${params}`)
+    const visibleParams = new URLSearchParams(params)
+    visibleParams.delete('paginated')
+    visibleParams.delete('pageSize')
+    if (page === 1) visibleParams.delete('page')
+    window.history.replaceState(null, '', visibleParams.toString() ? `/catalogo?${visibleParams}` : '/catalogo')
+
+    const controller = new AbortController()
+    fetch(`/api/products?${params}`, { signal: controller.signal })
       .then(r => r.json())
       .then(data => {
-        setProducts(Array.isArray(data) ? data : [])
-        setPage(1)
+        if (requestSeq.current !== requestId) return
+        const items = Array.isArray(data) ? data : data.items || []
+        setProducts(page === 1 ? items : prev => [...prev, ...items])
+        setTotal(Array.isArray(data) ? items.length : data.total || 0)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
-  }, [search, categoryId, sort, brand, size, color, inStock, minPrice, maxPrice])
+      .catch((error) => {
+        if (error?.name !== 'AbortError' && requestSeq.current === requestId) setLoading(false)
+    })
+    return () => controller.abort()
+  }, [filtersReady, debouncedSearch, categoryId, sort, brand, size, color, inStock, minPrice, maxPrice, page])
 
   const featured = products.find(p => p.featured)
   const rest = products.filter(p => !p.featured || p !== featured)
   const allDisplay = featured ? [featured, ...rest] : products
-  const paginated = allDisplay.slice(0, page * PER_PAGE)
-  const hasMore = paginated.length < allDisplay.length
+  const hasMore = allDisplay.length < total
 
   const clearFilters = () => { setSearch(''); setCategoryId(''); setSort('newest'); setBrand(''); setSize(''); setColor(''); setInStock(false); setMinPrice(''); setMaxPrice('') }
   const hasActiveFilters = search || categoryId || sort !== 'newest' || brand || size || color || inStock || minPrice || maxPrice
@@ -87,8 +131,8 @@ export default function CatalogoPage() {
               </div>
               <div className="rounded-lg border border-white/10 bg-black/25 px-4 py-3 text-sm text-text-secondary">
                 <PackageCheck className="mb-2 h-5 w-5 text-accent" />
-                <span className="block text-2xl font-black text-white">{loading ? '...' : allDisplay.length}</span>
-                producto{allDisplay.length !== 1 ? 's' : ''} encontrado{allDisplay.length !== 1 ? 's' : ''}
+                <span className="block text-2xl font-black text-white">{loading && page === 1 ? '...' : total}</span>
+                producto{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
               </div>
             </div>
           </div>
@@ -235,8 +279,8 @@ export default function CatalogoPage() {
         )}
 
         {/* Product grid */}
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {loading && page === 1 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="bg-card/40 border border-white/5 rounded-lg overflow-hidden animate-pulse">
                 <div className="aspect-square bg-secondary/60" />
@@ -256,9 +300,9 @@ export default function CatalogoPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-              {paginated.map((product, idx) => {
-                if (idx === 0 && product.featured && !search && !categoryId) {
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
+              {allDisplay.map((product, idx) => {
+                if (idx === 0 && product.featured && !debouncedSearch && !categoryId) {
                   return <FeaturedProductCard key={product.id} product={product} />
                 }
                 return <ProductCard key={product.id} product={product} config={config} />
@@ -270,9 +314,10 @@ export default function CatalogoPage() {
               <div className="text-center mt-10">
                 <button
                   onClick={() => setPage(p => p + 1)}
-                  className="bg-card border border-white/10 hover:border-accent/50 text-white font-medium px-8 py-3 rounded-lg transition-colors"
+                  disabled={loading}
+                  className="bg-card border border-white/10 hover:border-accent/50 text-white font-medium px-8 py-3 rounded-lg transition-colors disabled:opacity-50"
                 >
-                  Cargar más productos
+                  {loading ? 'Cargando...' : 'Cargar más productos'}
                 </button>
               </div>
             )}

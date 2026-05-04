@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession, slugify } from '@/lib/api-utils';
+import { productUpdateSchema, zodErrorMessage } from '@/lib/validation';
 
 export async function GET(
   request: Request,
@@ -15,6 +15,9 @@ export async function GET(
     if (!product) {
       return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 });
     }
+    if ((!product.active || product.status !== 'PUBLISHED') && !(await requireAdminSession())) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     return NextResponse.json(product);
   } catch (error) {
     return NextResponse.json({ error: 'Error al obtener producto' }, { status: 500 });
@@ -26,14 +29,18 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
-    const data = await request.json();
+    const parsed = productUpdateSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: zodErrorMessage(parsed.error) }, { status: 400 });
+    }
+    const data = parsed.data;
     
     const updateData: any = {};
     if (data.name !== undefined) updateData.name = data.name;
-    if (data.slug !== undefined) updateData.slug = data.slug;
+    if (data.slug !== undefined) updateData.slug = data.slug ? slugify(data.slug) : data.slug;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.shortDescription !== undefined) updateData.shortDescription = data.shortDescription;
     if (data.brand !== undefined) updateData.brand = data.brand || null;
@@ -41,13 +48,13 @@ export async function PUT(
     if (data.sizes !== undefined) updateData.sizes = data.sizes || null;
     if (data.colors !== undefined) updateData.colors = data.colors || null;
     if (data.specs !== undefined) updateData.specs = data.specs || null;
-    if (data.price !== undefined) updateData.price = parseFloat(data.price);
-    if (data.compareAtPrice !== undefined) updateData.compareAtPrice = data.compareAtPrice ? parseFloat(data.compareAtPrice) : null;
+    if (data.price !== undefined) updateData.price = data.price;
+    if (data.compareAtPrice !== undefined) updateData.compareAtPrice = data.compareAtPrice || null;
     if (data.status !== undefined) updateData.status = data.status;
     if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
     if (data.featured !== undefined) updateData.featured = data.featured;
     if (data.active !== undefined) updateData.active = data.active;
-    if (data.stock !== undefined) updateData.stock = parseInt(data.stock, 10);
+    if (data.stock !== undefined) updateData.stock = data.stock;
     if (data.whatsappMessageOverride !== undefined) updateData.whatsappMessageOverride = data.whatsappMessageOverride || null;
     if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle || null;
     if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription || null;
@@ -60,7 +67,10 @@ export async function PUT(
       include: { category: true, images: { orderBy: { sortOrder: 'asc' } } },
     });
     return NextResponse.json(product);
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'P2002') {
+      return NextResponse.json({ error: 'Ya existe un producto con ese slug.' }, { status: 409 });
+    }
     return NextResponse.json({ error: 'Error al actualizar producto' }, { status: 500 });
   }
 }
@@ -70,7 +80,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
     const { searchParams } = new URL(request.url);

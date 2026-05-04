@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession } from '@/lib/api-utils';
+import { bannerSchema, zodErrorMessage } from '@/lib/validation';
 
 export async function GET() {
   try {
@@ -17,10 +17,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
-    const data = await request.json();
+    const parsed = bannerSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: zodErrorMessage(parsed.error) }, { status: 400 });
+    }
+    const data = parsed.data;
     const banner = await prisma.banner.create({
       data: {
         title: data.title,
@@ -30,8 +34,8 @@ export async function POST(request: Request) {
         position: data.position || 'HERO',
         active: data.active ?? true,
         sortOrder: data.sortOrder ?? 0,
-        startDate: data.startDate ? new Date(data.startDate) : null,
-        endDate: data.endDate ? new Date(data.endDate) : null,
+        startDate: data.startDate,
+        endDate: data.endDate,
       },
     });
     return NextResponse.json(banner, { status: 201 });

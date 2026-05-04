@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession } from '@/lib/api-utils';
 import { deleteLocalImage } from '@/lib/image-utils';
 
 export async function DELETE(
@@ -9,7 +8,7 @@ export async function DELETE(
   { params }: { params: { id: string; imageId: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
     const image = await prisma.productImage.findUnique({
@@ -53,7 +52,7 @@ export async function PUT(
   { params }: { params: { id: string; imageId: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
     const image = await prisma.productImage.findUnique({ where: { id: params.imageId } });

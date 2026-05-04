@@ -21,7 +21,8 @@ export function ProductCard({ product, config }: { product: any, config: any }) 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId: product.id, source: 'CARD' }),
     }).catch(() => undefined);
-    const message = generateProductWhatsAppMessage(product.name, product.price, config.whatsappMessage ?? undefined, product.whatsappMessageOverride);
+    const productUrl = `${window.location.origin}/producto/${product.slug}`;
+    const message = generateProductWhatsAppMessage(product.name, product.price, config.whatsappMessage ?? undefined, product.whatsappMessageOverride, productUrl);
     const cleanNumber = config.whatsappNumber.replace(/\D/g, '');
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${cleanNumber}?text=${encodedMessage}`, '_blank');
@@ -31,12 +32,12 @@ export function ProductCard({ product, config }: { product: any, config: any }) 
     <div className="group catalog-surface relative border border-white/5 rounded-xl overflow-hidden hover:border-accent/35 transition-all duration-300 flex flex-col h-full hover:-translate-y-1 hover:shadow-[0_20px_55px_rgba(0,0,0,0.35)] shine-card">
       <Link href={`/producto/${product.slug}`} className="flex-1 flex flex-col">
         {/* Image */}
-        <div className="relative aspect-square w-full bg-secondary/50 overflow-hidden">
+        <div className="relative aspect-[4/5] sm:aspect-square w-full bg-secondary/50 overflow-hidden">
            <Image
              src={imageUrl}
              alt={product.name}
              fill
-             className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+             className="object-cover scale-[1.08] transition-transform duration-500 ease-out group-hover:scale-[1.15]"
              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
            />
            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/55 to-transparent" />

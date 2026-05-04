@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession } from '@/lib/api-utils';
 
 function csvValue(value: unknown) {
   const text = value === null || value === undefined ? '' : String(value);
@@ -9,7 +8,7 @@ function csvValue(value: unknown) {
 }
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const session = await requireAdminSession();
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
   const products = await prisma.product.findMany({

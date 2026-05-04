@@ -1,24 +1,24 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession } from '@/lib/api-utils';
+import { z } from 'zod';
+
+const bulkPriceSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1).max(500),
+  type: z.enum(['percentage', 'fixed']),
+  value: z.number().finite().min(-1000000).max(1000000),
+});
 
 export async function PUT(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
-    const { ids, type, value } = await request.json();
-
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return NextResponse.json({ error: 'Se requiere una lista de IDs de productos' }, { status: 400 });
+    const parsed = bulkPriceSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Datos de actualización inválidos' }, { status: 400 });
     }
-    if (!type || !['percentage', 'fixed'].includes(type)) {
-      return NextResponse.json({ error: 'Tipo debe ser "percentage" o "fixed"' }, { status: 400 });
-    }
-    if (typeof value !== 'number') {
-      return NextResponse.json({ error: 'El valor debe ser un número' }, { status: 400 });
-    }
+    const { ids, type, value } = parsed.data;
 
     const products = await prisma.product.findMany({
       where: { id: { in: ids } },

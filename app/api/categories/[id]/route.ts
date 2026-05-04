@@ -1,22 +1,26 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession, slugify } from '@/lib/api-utils';
+import { categoryUpdateSchema, zodErrorMessage } from '@/lib/validation';
 
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
-    const data = await request.json();
+    const parsed = categoryUpdateSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: zodErrorMessage(parsed.error) }, { status: 400 });
+    }
+    const data = parsed.data;
     const updateData: any = {};
     if (data.name !== undefined) updateData.name = data.name;
-    if (data.slug !== undefined) updateData.slug = data.slug;
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+    if (data.slug !== undefined) updateData.slug = slugify(data.slug);
+    if (data.description !== undefined) updateData.description = data.description || null;
+    if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl || null;
     if (data.active !== undefined) updateData.active = data.active;
     if (data.sortOrder !== undefined) updateData.sortOrder = data.sortOrder;
 
@@ -25,7 +29,10 @@ export async function PUT(
       data: updateData,
     });
     return NextResponse.json(category);
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'P2002') {
+      return NextResponse.json({ error: 'Ya existe una categoría con ese slug' }, { status: 409 });
+    }
     return NextResponse.json({ error: 'Error al actualizar categoría' }, { status: 500 });
   }
 }
@@ -35,7 +42,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
     // Check if category has products

@@ -8,19 +8,22 @@ export function generateProductWhatsAppMessage(
   productName: string,
   price: number | string,
   baseTemplate?: string,
-  overrideMessage?: string | null
+  overrideMessage?: string | null,
+  productUrl?: string
 ): string {
+  const replacements = (template: string) =>
+    template
+      .replaceAll('{productName}', productName)
+      .replaceAll('{price}', price.toString())
+      .replaceAll('{productUrl}', productUrl || '');
+
   if (overrideMessage) {
-    return overrideMessage
-      .replace('{productName}', productName)
-      .replace('{price}', price.toString());
+    return replacements(overrideMessage);
   }
 
   if (baseTemplate) {
-    return baseTemplate
-      .replace('{productName}', productName)
-      .replace('{price}', price.toString());
+    return replacements(baseTemplate);
   }
 
-  return `Hola! Me interesa el producto: ${productName} - Precio: $${price} ARS. Esta disponible?`;
+  return `Hola! Me interesa el producto: ${productName} - Precio: $${price} ARS. Esta disponible?${productUrl ? ` Link: ${productUrl}` : ''}`;
 }

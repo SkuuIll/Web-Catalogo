@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
+
+const clickSchema = z.object({
+  productId: z.string().min(1).optional().nullable(),
+  source: z.string().trim().max(40).optional(),
+});
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json().catch(() => ({}));
+    const parsed = clickSchema.safeParse(await request.json().catch(() => ({})));
+    const data = parsed.success ? parsed.data : {};
     await prisma.whatsAppClick.create({
       data: {
         productId: data.productId || null,

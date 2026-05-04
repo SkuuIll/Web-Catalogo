@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession, slugify } from '@/lib/api-utils';
+import { categorySchema, zodErrorMessage } from '@/lib/validation';
 
 export async function GET() {
   try {
@@ -17,21 +17,28 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const data = await request.json();
+    const parsed = categorySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: zodErrorMessage(parsed.error) }, { status: 400 });
+    }
+    const data = parsed.data;
     const category = await prisma.category.create({
       data: {
         name: data.name,
-        slug: data.slug,
-        description: data.description,
-        imageUrl: data.imageUrl,
+        slug: slugify(data.slug),
+        description: data.description || null,
+        imageUrl: data.imageUrl || null,
         active: data.active ?? true,
         sortOrder: data.sortOrder ?? 0,
       }
     });
     return NextResponse.json(category, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'P2002') {
+      return NextResponse.json({ error: 'Ya existe una categoría con ese slug' }, { status: 409 });
+    }
     return NextResponse.json({ error: 'Failed to create category' }, { status: 500 });
   }
 }
