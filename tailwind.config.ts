@@ -20,6 +20,19 @@ const config: Config = {
         "text-primary": "var(--text-primary)",
         "text-secondary": "var(--text-secondary)",
       },
+      borderRadius: {
+        '2xl': 'var(--radius-lg)',
+        'xl': 'var(--radius-md)',
+      },
+      transitionDuration: {
+        '400': '400ms',
+        '600': '600ms',
+      },
+      animation: {
+        'fade-up': 'fade-up 700ms cubic-bezier(0.22, 1, 0.36, 1) both',
+        'slide-up': 'slide-up 400ms cubic-bezier(0.22, 1, 0.36, 1) both',
+        'shimmer': 'shimmer 1.8s ease-in-out infinite',
+      },
     },
   },
   plugins: [],

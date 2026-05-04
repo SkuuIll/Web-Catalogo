@@ -2,7 +2,20 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { ProductCard } from '@/components/shop/ProductCard'
 import { FeaturedProductCard } from '@/components/shop/FeaturedProductCard'
-import { Search, SlidersHorizontal, X, ChevronDown, Sparkles, PackageCheck } from 'lucide-react'
+import { Search, SlidersHorizontal, X, ChevronDown, Sparkles, PackageCheck, Loader2 } from 'lucide-react'
+
+function SkeletonCard() {
+  return (
+    <div className="bg-card/30 border border-white/[0.04] rounded-xl overflow-hidden">
+      <div className="aspect-square bg-secondary/30 shimmer" />
+      <div className="p-4 space-y-2.5">
+        <div className="h-2.5 bg-white/[0.04] rounded-full w-1/3 shimmer" />
+        <div className="h-3.5 bg-white/[0.04] rounded-full w-4/5 shimmer" />
+        <div className="h-3 bg-white/[0.04] rounded-full w-2/5 shimmer" />
+      </div>
+    </div>
+  )
+}
 
 export default function CatalogoPage() {
   const [config, setConfig] = useState<any>(null)
@@ -107,29 +120,29 @@ export default function CatalogoPage() {
 
   const clearFilters = () => { setSearch(''); setCategoryId(''); setSort('newest'); setBrand(''); setSize(''); setColor(''); setInStock(false); setMinPrice(''); setMaxPrice('') }
   const hasActiveFilters = search || categoryId || sort !== 'newest' || brand || size || color || inStock || minPrice || maxPrice
-  const filterFieldClass = "h-11 w-full rounded-lg border border-white/10 bg-black/25 px-3 text-sm font-medium text-white placeholder:text-text-secondary outline-none transition-colors focus:border-accent focus:bg-black/35"
-  const selectClass = "h-12 w-full appearance-none rounded-lg border border-white/10 bg-black/25 px-4 pr-10 text-sm font-bold text-white outline-none transition-colors focus:border-accent"
+  const filterFieldClass = "h-11 w-full rounded-xl border border-white/[0.06] bg-black/20 px-3.5 text-sm font-medium text-white placeholder:text-text-secondary outline-none transition-all duration-300 focus:border-accent focus:bg-black/30 focus:ring-1 focus:ring-accent/20"
+  const selectClass = "h-12 w-full appearance-none rounded-xl border border-white/[0.06] bg-black/20 px-4 pr-10 text-sm font-bold text-white outline-none transition-all duration-300 focus:border-accent focus:ring-1 focus:ring-accent/20"
 
   return (
     <div className="min-h-screen bg-bg-primary px-4 py-8 md:py-16">
       <div className="container mx-auto max-w-7xl">
 
         {/* Header */}
-        <div className="mb-7 overflow-hidden rounded-lg border border-white/10 bg-card">
+        <div className="mb-7 overflow-hidden rounded-xl border border-white/[0.06] bg-card/60">
           <div className="relative p-5 md:p-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(200,149,42,0.18),transparent_26rem)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_20%_10%,rgba(200,149,42,0.12),transparent)]" />
             <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-accent">
-                  <Sparkles className="h-3.5 w-3.5" />
+                <p className="mb-2 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-accent">
+                  <Sparkles className="h-3 w-3 fill-accent" />
                   Tienda visual
                 </p>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white">Catálogo</h1>
+                <h1 className="text-3xl md:text-5xl font-black tracking-tight text-gradient">Catálogo</h1>
                 <p className="mt-3 max-w-2xl text-sm md:text-base text-text-secondary">
                   Explorá productos por categoría, marca, talle, color y disponibilidad. Todo preparado para consultar rápido por WhatsApp.
                 </p>
               </div>
-              <div className="rounded-lg border border-white/10 bg-black/25 px-4 py-3 text-sm text-text-secondary">
+              <div className="rounded-xl border border-white/[0.06] bg-black/20 px-4 py-3 text-sm text-text-secondary">
                 <PackageCheck className="mb-2 h-5 w-5 text-accent" />
                 <span className="block text-2xl font-black text-white">{loading && page === 1 ? '...' : total}</span>
                 producto{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
@@ -138,27 +151,29 @@ export default function CatalogoPage() {
           </div>
         </div>
 
-        <section className="mb-8 overflow-hidden rounded-lg border border-white/10 bg-card/70 shadow-2xl shadow-black/20">
-          <div className="border-b border-white/10 px-4 py-3 md:px-5">
+        {/* Filters */}
+        <section className="mb-8 overflow-hidden rounded-xl border border-white/[0.06] bg-card/50 shadow-2xl shadow-black/15">
+          <div className="border-b border-white/[0.06] px-4 py-3.5 md:px-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-sm font-black text-white">Buscar y filtrar</p>
                 <p className="text-xs text-text-secondary">Afiná por rubro, marca, variante, precio y stock.</p>
               </div>
               {hasActiveFilters && (
-                <button onClick={clearFilters} className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-xs font-bold text-text-secondary transition-colors hover:border-accent/40 hover:text-accent">
+                <button onClick={clearFilters} className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-white/[0.06] px-3 py-2 text-xs font-bold text-text-secondary transition-all duration-300 hover:border-accent/30 hover:text-accent hover:bg-accent/[0.05]">
                   <X className="h-3.5 w-3.5" /> Limpiar filtros
                 </button>
               )}
             </div>
           </div>
 
+          {/* Category pills */}
           {categories.length > 0 && (
-            <div className="border-b border-white/10 px-4 py-3 md:px-5">
+            <div className="border-b border-white/[0.06] px-4 py-3 md:px-5">
               <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
                 <button
                   onClick={() => setCategoryId('')}
-                  className={`shrink-0 rounded-lg border px-3.5 py-2 text-xs font-black transition-all ${!categoryId ? 'border-accent bg-accent text-black shadow-lg shadow-accent/15' : 'border-white/10 bg-black/20 text-text-secondary hover:border-accent/40 hover:text-accent'}`}
+                  className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition-all duration-300 ${!categoryId ? 'border-accent bg-accent text-black shadow-lg shadow-accent/15' : 'border-white/[0.06] bg-black/15 text-text-secondary hover:border-accent/30 hover:text-accent'}`}
                 >
                   Todo
                 </button>
@@ -166,7 +181,7 @@ export default function CatalogoPage() {
                   <button
                     key={c.id}
                     onClick={() => setCategoryId(c.id)}
-                    className={`shrink-0 rounded-lg border px-3.5 py-2 text-xs font-black transition-all ${categoryId === c.id ? 'border-accent bg-accent text-black shadow-lg shadow-accent/15' : 'border-white/10 bg-black/20 text-text-secondary hover:border-accent/40 hover:text-accent'}`}
+                    className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition-all duration-300 ${categoryId === c.id ? 'border-accent bg-accent text-black shadow-lg shadow-accent/15' : 'border-white/[0.06] bg-black/15 text-text-secondary hover:border-accent/30 hover:text-accent'}`}
                   >
                     {c.name}
                   </button>
@@ -184,10 +199,10 @@ export default function CatalogoPage() {
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Buscar por producto, marca o detalle..."
-                  className="h-12 w-full rounded-lg border border-white/10 bg-black/25 pl-11 pr-10 text-sm font-medium text-white placeholder:text-text-secondary outline-none transition-colors focus:border-accent focus:bg-black/35"
+                  className="h-12 w-full rounded-xl border border-white/[0.06] bg-black/20 pl-11 pr-10 text-sm font-medium text-white placeholder:text-text-secondary outline-none transition-all duration-300 focus:border-accent focus:bg-black/30 focus:ring-1 focus:ring-accent/20"
                 />
                 {search && (
-                  <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-white">
+                  <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-white transition-colors">
                     <X className="h-4 w-4" />
                   </button>
                 )}
@@ -212,7 +227,7 @@ export default function CatalogoPage() {
 
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex h-12 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-bold transition-colors md:hidden ${showFilters || hasActiveFilters ? 'border-accent bg-accent/10 text-accent' : 'border-white/10 bg-black/25 text-text-secondary'}`}
+                className={`flex h-12 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-bold transition-all duration-300 md:hidden ${showFilters || hasActiveFilters ? 'border-accent bg-accent/10 text-accent' : 'border-white/[0.06] bg-black/20 text-text-secondary'}`}
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 Filtros
@@ -225,7 +240,7 @@ export default function CatalogoPage() {
               <input value={color} onChange={e => setColor(e.target.value)} placeholder="Color" className={filterFieldClass} />
               <input type="number" value={minPrice} onChange={e => setMinPrice(e.target.value)} placeholder="Precio mín." className={filterFieldClass} />
               <input type="number" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} placeholder="Precio máx." className={filterFieldClass} />
-              <label className={`flex h-11 items-center gap-2 rounded-lg border px-3 text-sm font-bold transition-colors ${inStock ? 'border-accent bg-accent/10 text-accent' : 'border-white/10 bg-black/25 text-text-secondary'}`}>
+              <label className={`flex h-11 cursor-pointer items-center gap-2 rounded-xl border px-3 text-sm font-bold transition-all duration-300 ${inStock ? 'border-accent bg-accent/10 text-accent' : 'border-white/[0.06] bg-black/20 text-text-secondary'}`}>
                 <input type="checkbox" checked={inStock} onChange={e => setInStock(e.target.checked)} />
                 Solo stock
               </label>
@@ -235,24 +250,24 @@ export default function CatalogoPage() {
 
         {/* Mobile filters panel */}
         {showFilters && (
-          <div className="md:hidden bg-card border border-white/10 rounded-lg p-4 mb-4 space-y-3">
+          <div className="md:hidden bg-card/60 border border-white/[0.06] rounded-xl p-4 mb-4 space-y-3 slide-up">
             <div>
-              <label className="text-xs text-text-secondary mb-1 block">Categoría</label>
+              <label className="text-xs text-text-secondary mb-1 block font-semibold">Categoría</label>
               <select
                 value={categoryId}
                 onChange={e => setCategoryId(e.target.value)}
-                className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-white focus:border-accent outline-none"
+                className="w-full bg-secondary border border-border rounded-xl px-3 py-2.5 text-sm text-white focus:border-accent outline-none"
               >
                 <option value="">Todas</option>
                 {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-text-secondary mb-1 block">Ordenar</label>
+              <label className="text-xs text-text-secondary mb-1 block font-semibold">Ordenar</label>
               <select
                 value={sort}
                 onChange={e => setSort(e.target.value)}
-                className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-white focus:border-accent outline-none"
+                className="w-full bg-secondary border border-border rounded-xl px-3 py-2.5 text-sm text-white focus:border-accent outline-none"
               >
                 <option value="newest">Más nuevos</option>
                 <option value="price_asc">Precio: menor a mayor</option>
@@ -267,7 +282,7 @@ export default function CatalogoPage() {
                 <input type="number" value={minPrice} onChange={e => setMinPrice(e.target.value)} placeholder="Mín." className={filterFieldClass} />
                 <input type="number" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} placeholder="Máx." className={filterFieldClass} />
               </div>
-              <label className="flex items-center gap-2 text-sm text-text-secondary">
+              <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
                 <input type="checkbox" checked={inStock} onChange={e => setInStock(e.target.checked)} />
                 Mostrar solo productos con stock
               </label>
@@ -280,27 +295,21 @@ export default function CatalogoPage() {
 
         {/* Product grid */}
         {loading && page === 1 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-card/40 border border-white/5 rounded-lg overflow-hidden animate-pulse">
-                <div className="aspect-square bg-secondary/60" />
-                <div className="p-4 space-y-2">
-                  <div className="h-3 bg-secondary/60 rounded w-1/2" />
-                  <div className="h-4 bg-secondary/60 rounded w-3/4" />
-                  <div className="h-4 bg-secondary/60 rounded w-1/3" />
-                </div>
-              </div>
+              <SkeletonCard key={i} />
             ))}
           </div>
         ) : allDisplay.length === 0 ? (
-          <div className="text-center py-20 bg-card/40 backdrop-blur-md rounded-lg border border-white/10">
-            <Search className="w-12 h-12 mx-auto text-text-secondary/30 mb-4" />
-            <p className="text-xl text-text-secondary">Sin resultados para tu búsqueda.</p>
-            <button onClick={clearFilters} className="mt-4 text-accent hover:text-accent-hover text-sm underline">Ver todos los productos</button>
+          <div className="text-center py-20 bg-card/30 backdrop-blur-md rounded-xl border border-white/[0.06]">
+            <Search className="w-12 h-12 mx-auto text-text-secondary/20 mb-4" />
+            <p className="text-xl text-text-secondary font-bold">Sin resultados para tu búsqueda.</p>
+            <p className="text-sm text-text-secondary mt-2">Probá con otros filtros o palabras clave.</p>
+            <button onClick={clearFilters} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-black hover:bg-accent-hover transition-colors">Ver todos los productos</button>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">
               {allDisplay.map((product, idx) => {
                 if (idx === 0 && product.featured && !debouncedSearch && !categoryId) {
                   return <FeaturedProductCard key={product.id} product={product} />
@@ -311,13 +320,20 @@ export default function CatalogoPage() {
 
             {/* Load more */}
             {hasMore && (
-              <div className="text-center mt-10">
+              <div className="text-center mt-12">
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={loading}
-                  className="bg-card border border-white/10 hover:border-accent/50 text-white font-medium px-8 py-3 rounded-lg transition-colors disabled:opacity-50"
+                  className="group inline-flex items-center gap-2 bg-card border border-white/[0.06] hover:border-accent/30 text-white font-bold px-8 py-3.5 rounded-xl transition-all duration-300 disabled:opacity-50 hover:bg-accent/[0.05]"
                 >
-                  {loading ? 'Cargando...' : 'Cargar más productos'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Cargando...
+                    </>
+                  ) : (
+                    'Cargar más productos'
+                  )}
                 </button>
               </div>
             )}

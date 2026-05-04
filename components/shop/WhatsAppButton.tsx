@@ -15,8 +15,19 @@ export function WhatsAppButton({ number, message }: { number?: string | null, me
     window.open(`https://wa.me/${cleanNumber}?text=${encodedMessage}`, '_blank');
   };
   return (
-    <button onClick={handleWA} className="fixed bottom-24 right-4 md:bottom-6 md:right-6 bg-accent hover:bg-accent-hover text-primary p-4 rounded-full shadow-lg z-50 transition-colors hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(200,149,42,0.3)]" aria-label="Consultar por WhatsApp">
-      <MessageCircle className="h-6 w-6 text-white" />
+    <button
+      onClick={handleWA}
+      className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-50 group"
+      aria-label="Consultar por WhatsApp"
+    >
+      <div className="relative">
+        {/* Pulse ring */}
+        <span className="absolute inset-0 rounded-full bg-accent/30 animate-ping" style={{ animationDuration: '2s' }} />
+        {/* Button */}
+        <div className="relative bg-gradient-to-br from-accent to-amber-500 text-white p-3.5 rounded-full shadow-xl shadow-accent/25 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_16px_40px_rgba(200,149,42,0.35)] group-hover:scale-105">
+          <MessageCircle className="h-6 w-6" />
+        </div>
+      </div>
     </button>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Download, X } from 'lucide-react'
+import { Download, X, Zap } from 'lucide-react'
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -44,19 +44,19 @@ export function PWAInstallPrompt() {
   if (!visible || !installEvent) return null
 
   return (
-    <div className="fixed bottom-24 left-4 right-4 z-50 mx-auto max-w-md rounded-lg border border-accent/25 bg-card/95 p-4 shadow-2xl shadow-black/40 backdrop-blur md:bottom-6">
+    <div className="fixed bottom-24 left-4 right-4 z-50 mx-auto max-w-md rounded-2xl border border-accent/20 bg-card/95 p-4 shadow-2xl shadow-black/50 backdrop-blur-xl md:bottom-6 slide-up">
       <div className="flex items-start gap-3">
-        <div className="rounded-lg bg-accent/15 p-2 text-accent">
+        <div className="rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 p-2.5 text-accent border border-accent/20">
           <Download className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-bold text-white">Instalar catálogo</p>
-          <p className="mt-1 text-sm text-text-secondary">Agregalo al inicio del celular para abrirlo como app.</p>
-          <button onClick={install} className="mt-3 rounded-lg bg-accent px-4 py-2 text-sm font-bold text-black transition-colors hover:bg-accent-hover">
+          <p className="font-bold text-white text-sm">Instalar catálogo</p>
+          <p className="mt-1 text-xs text-text-secondary leading-relaxed">Agregalo al inicio del celular para abrirlo como app.</p>
+          <button onClick={install} className="mt-3 rounded-lg bg-accent px-4 py-2 text-sm font-bold text-black transition-all duration-300 hover:bg-accent-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent/20">
             Instalar
           </button>
         </div>
-        <button onClick={dismiss} className="rounded-lg p-1 text-text-secondary transition-colors hover:bg-white/5 hover:text-white" aria-label="Cerrar">
+        <button onClick={dismiss} className="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-white" aria-label="Cerrar">
           <X className="h-4 w-4" />
         </button>
       </div>

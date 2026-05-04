@@ -1,12 +1,20 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Search, Zap } from 'lucide-react'
+import { Search, Zap, ChevronRight } from 'lucide-react'
 
 export function Navbar({ config }: { config: any }) {
   const pathname = usePathname()
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const navItems = [
     { href: '/', label: 'Inicio' },
     { href: '/categorias', label: 'Categorías' },
@@ -15,41 +23,64 @@ export function Navbar({ config }: { config: any }) {
   const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href)
 
   return (
-    <header className="w-full bg-bg-primary/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-40 hidden md:block">
-      <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+    <header
+      className={`w-full sticky top-0 z-40 hidden md:block transition-all duration-500 ${
+        scrolled
+          ? 'glass-strong border-b border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.3)]'
+          : 'bg-transparent border-b border-transparent'
+      }`}
+    >
+      <div className="container mx-auto px-6 h-[72px] flex items-center justify-between">
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
           {config?.logoUrl ? (
-            <img src={config.logoUrl} alt={config.siteName} className="h-10 group-hover:scale-105 transition-transform" />
+            <img src={config.logoUrl} alt={config.siteName} className="h-10 group-hover:scale-105 transition-transform duration-300" />
           ) : (
             <>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-yellow-400 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:shadow-accent/40 transition-shadow">
+              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-accent via-amber-400 to-yellow-500 flex items-center justify-center shadow-lg shadow-accent/25 group-hover:shadow-accent/40 transition-all duration-300 group-hover:scale-105">
                 <Zap className="w-5 h-5 text-black fill-black" />
+                <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg font-black tracking-tight text-white leading-none">
+                <span className="text-[17px] font-black tracking-tight text-white leading-none">
                   {config?.siteName || 'SHOWROOM JR'}
                 </span>
-                <span className="text-[11px] text-text-secondary font-medium leading-none mt-0.5">
-                  {config?.siteSlogan || 'Premium product catalog'}
+                <span className="text-[10px] text-text-secondary font-medium leading-none mt-1 tracking-wide uppercase">
+                  {config?.siteSlogan || 'Catálogo premium'}
                 </span>
               </div>
             </>
           )}
         </Link>
-        <nav className="flex items-center gap-1 rounded-lg border border-white/5 bg-white/5 px-2 py-1.5">
+
+        {/* Nav Pill */}
+        <nav className="flex items-center gap-0.5 rounded-full border border-white/[0.06] bg-white/[0.03] px-1.5 py-1">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${isActive(item.href) ? 'bg-white/10 text-white shadow-inner' : 'text-text-secondary hover:bg-white/5 hover:text-white'}`}
+              className={`relative rounded-full px-5 py-2 text-[13px] font-semibold transition-all duration-300 ${
+                isActive(item.href)
+                  ? 'bg-white/[0.08] text-white shadow-inner'
+                  : 'text-text-secondary hover:text-white hover:bg-white/[0.04]'
+              }`}
             >
               {item.label}
+              {isActive(item.href) && (
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] rounded-full bg-accent" />
+              )}
             </Link>
           ))}
         </nav>
+
+        {/* Actions */}
         <div className="flex items-center gap-2">
-          <Link href="/catalogo" className="p-2.5 rounded-lg bg-white/5 border border-white/5 text-text-secondary hover:text-accent hover:bg-accent/10 hover:border-accent/30 transition-all" aria-label="Buscar productos">
-            <Search className="w-5 h-5" />
+          <Link
+            href="/catalogo"
+            className="group flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-accent hover:bg-accent/[0.08] hover:border-accent/25 transition-all duration-300"
+            aria-label="Buscar productos"
+          >
+            <Search className="w-[18px] h-[18px]" />
           </Link>
         </div>
       </div>

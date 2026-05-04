@@ -17,24 +17,30 @@ export default function GlobalError({
 
   return (
     <html lang="es-AR">
-      <body>
-        <div className="flex min-h-screen items-center justify-center bg-bg-primary px-4 py-20 text-text-primary">
-          <div className="w-full max-w-2xl text-center">
-            <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-lg border border-red-500/20 bg-card text-red-400 shadow-2xl shadow-black/30">
-              <XOctagon className="h-12 w-12" />
+      <body style={{ margin: 0, backgroundColor: '#0a0a0a', fontFamily: 'Inter, -apple-system, sans-serif' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem', color: '#f5f5f5' }}>
+          <div style={{ width: '100%', maxWidth: '32rem', textAlign: 'center' }}>
+            <div style={{ margin: '0 auto 2rem', width: '5rem', height: '5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '1rem', border: '1px solid rgba(239, 68, 68, 0.2)', background: 'rgba(22,22,22,0.6)' }}>
+              <XOctagon style={{ width: '2.5rem', height: '2.5rem', color: '#ef4444' }} />
             </div>
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-red-400">Error crítico</p>
-            <h1 className="text-4xl font-black tracking-tight text-white md:text-6xl">Algo salió mal</h1>
-            <p className="mx-auto mt-5 max-w-xl text-text-secondary">La aplicación encontró un problema inesperado. Podés intentar recargar o volver al inicio.</p>
-            <div className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
-              <button onClick={() => reset()} className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-black text-black hover:bg-accent-hover">
-                <RefreshCcw className="h-4 w-4" />
+            <p style={{ marginBottom: '0.75rem', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#ef4444' }}>Error crítico</p>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#fff', marginBottom: '0' }}>Algo salió mal</h1>
+            <p style={{ marginTop: '1.25rem', maxWidth: '28rem', marginLeft: 'auto', marginRight: 'auto', color: '#7a7a7a', lineHeight: 1.6 }}>La aplicación encontró un problema inesperado. Podés intentar recargar o volver al inicio.</p>
+            <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+              <button
+                onClick={() => reset()}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.875rem 1.75rem', borderRadius: '0.75rem', background: '#C8952A', color: '#000', fontWeight: 900, fontSize: '0.875rem', border: 'none', cursor: 'pointer' }}
+              >
+                <RefreshCcw style={{ width: '1rem', height: '1rem' }} />
                 Reintentar
               </button>
-              <Link href="/" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 px-5 py-3 text-sm font-bold text-text-secondary hover:text-white">
-                <Home className="h-4 w-4" />
+              <a
+                href="/"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.875rem 1.75rem', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.08)', color: '#7a7a7a', fontWeight: 700, fontSize: '0.875rem', textDecoration: 'none', background: 'transparent' }}
+              >
+                <Home style={{ width: '1rem', height: '1rem' }} />
                 Ir al inicio
-              </Link>
+              </a>
             </div>
           </div>
         </div>

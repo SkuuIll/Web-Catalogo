@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { Zap, Loader2, Lock, Mail } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -25,24 +26,76 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-card border border-border rounded-xl p-8 shadow-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-tighter text-accent mb-2">SHOWROOM JR</h1>
-          <p className="text-text-secondary">Panel de Administración</p>
+    <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4 overflow-hidden relative">
+      {/* Background decorations */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/[0.04] rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute inset-0 bg-dot-grid opacity-20" />
+
+      <div className="relative z-10 w-full max-w-md fade-up">
+        <div className="bg-card/80 backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 shadow-2xl shadow-black/30">
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-accent via-amber-400 to-yellow-500 shadow-xl shadow-accent/20 mb-5">
+              <Zap className="w-7 h-7 text-black fill-black" />
+            </div>
+            <h1 className="text-2xl font-black tracking-tight text-gradient mb-1">SHOWROOM JR</h1>
+            <p className="text-text-secondary text-sm">Panel de Administración</p>
+          </div>
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/25 text-red-400 p-3.5 rounded-xl mb-6 text-sm text-center font-medium">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-bold text-text-secondary mb-2">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-black/20 border border-white/[0.06] rounded-xl pl-11 pr-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 transition-all duration-300 placeholder:text-text-secondary"
+                  placeholder="admin@showroom.com"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-text-secondary mb-2">Contraseña</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-black/20 border border-white/[0.06] rounded-xl pl-11 pr-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 transition-all duration-300 placeholder:text-text-secondary"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-accent to-amber-500 hover:from-accent-hover hover:to-amber-400 text-black font-black py-3.5 rounded-xl transition-all duration-300 disabled:opacity-50 mt-2 flex items-center justify-center gap-2 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(200,149,42,0.25)]"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Iniciando...
+                </>
+              ) : (
+                'Ingresar'
+              )}
+            </button>
+          </form>
         </div>
-        {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded mb-6 text-sm text-center">{error}</div>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1">Email</label>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-secondary border border-border rounded px-4 py-2 text-text-primary focus:outline-none focus:border-accent transition-colors" placeholder="admin@showroom.com" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1">Contraseña</label>
-            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-secondary border border-border rounded px-4 py-2 text-text-primary focus:outline-none focus:border-accent transition-colors" placeholder="••••••••" />
-          </div>
-          <button type="submit" disabled={loading} className="w-full bg-accent hover:bg-accent-hover text-primary font-bold py-3 rounded transition-colors disabled:opacity-50 mt-6">{loading ? 'Iniciando...' : 'Ingresar'}</button>
-        </form>
+        <p className="text-center text-xs text-text-secondary mt-6">
+          © {new Date().getFullYear()} SHOWROOM JR · Panel Admin
+        </p>
       </div>
     </div>
   )
