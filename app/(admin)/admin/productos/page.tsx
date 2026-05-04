@@ -105,24 +105,24 @@ export default function AdminProductsPage() {
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
-  if (loading) return <div className="p-10 text-center text-text-secondary">Cargando productos...</div>
+  if (loading) return <div className="p-10 text-center text-text-secondary"><div className="inline-flex items-center gap-2"><div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />Cargando productos...</div></div>
 
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full">
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-6 md:mb-8">
         <div className="min-w-0">
-          <h1 className="text-2xl md:text-3xl font-bold mb-1">Productos</h1>
-          <p className="text-text-secondary">{products.length} productos en total.</p>
+          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gradient">Productos</h1>
+          <p className="text-sm text-text-secondary mt-1">{total} productos en total</p>
         </div>
         <Link
           href="/admin/productos/nuevo"
-          className="w-full sm:w-auto justify-center bg-accent hover:bg-accent-hover text-black font-bold py-2.5 px-5 rounded-lg transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto justify-center bg-gradient-to-r from-accent to-amber-500 hover:from-accent-hover hover:to-amber-400 text-black font-black py-2.5 px-5 rounded-xl transition-all duration-300 flex items-center gap-2 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(200,149,42,0.2)]"
         >
           <Plus className="w-4 h-4" /> Nuevo
         </Link>
       </div>
 
-      <div className="mb-6 rounded-lg border border-border bg-card p-4">
+      <div className="mb-6 rounded-xl border border-white/[0.06] bg-card/60 p-4">
         <div className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
           <Filter className="h-4 w-4 text-accent" />
           Filtros y orden
@@ -169,7 +169,7 @@ export default function AdminProductsPage() {
             {search ? 'Sin resultados para tu búsqueda.' : 'No hay productos registrados.'}
           </div>
         ) : products.map((product) => (
-          <div key={product.id} className="rounded-lg border border-border bg-card p-4">
+          <div key={product.id} className="rounded-xl border border-white/[0.06] bg-card/60 p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -221,11 +221,11 @@ export default function AdminProductsPage() {
         ))}
       </div>
 
-      <div className="hidden md:block bg-card border border-border rounded-lg overflow-hidden">
+      <div className="hidden md:block bg-card/60 border border-white/[0.06] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-secondary text-text-secondary text-xs uppercase tracking-wider border-b border-border">
+              <tr className="bg-white/[0.02] text-text-secondary text-xs uppercase tracking-wider border-b border-white/[0.06]">
                 <th className="p-4 font-medium">Nombre</th>
                 <th className="p-4 font-medium">Categoría</th>
                 <th className="p-4 font-medium">Precio</th>

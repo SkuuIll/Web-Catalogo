@@ -135,12 +135,12 @@ export default function AdminCategoriesPage() {
     <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full">
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-6 md:mb-8">
         <div className="min-w-0">
-          <h1 className="text-2xl md:text-3xl font-bold mb-1">Categorías</h1>
-          <p className="text-text-secondary">{categories.length} categorías registradas.</p>
+          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gradient">Categorías</h1>
+          <p className="text-sm text-text-secondary mt-1">{categories.length} categorías registradas.</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true) }}
-          className="w-full sm:w-auto justify-center bg-accent hover:bg-accent-hover text-black font-bold py-2.5 px-5 rounded-lg transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto justify-center bg-gradient-to-r from-accent to-amber-500 hover:from-accent-hover hover:to-amber-400 text-black font-black py-2.5 px-5 rounded-xl transition-all duration-300 flex items-center gap-2 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(200,149,42,0.2)]"
         >
           <Plus className="w-4 h-4" /> Nueva
         </button>
@@ -148,7 +148,7 @@ export default function AdminCategoriesPage() {
 
       {/* Form */}
       {showForm && (
-        <div className="bg-card border border-border rounded-lg p-4 sm:p-6 mb-6">
+        <div className="bg-card/60 border border-white/[0.06] rounded-xl p-4 sm:p-6 mb-6">
           <div className="flex justify-between items-center mb-5">
             <h2 className="text-lg font-bold">{editId ? 'Editar Categoría' : 'Nueva Categoría'}</h2>
             <button onClick={resetForm} className="text-text-secondary hover:text-white transition-colors">
@@ -256,11 +256,11 @@ export default function AdminCategoriesPage() {
       )}
 
       {/* Table */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
+      <div className="bg-card/60 border border-white/[0.06] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-secondary text-text-secondary text-xs uppercase tracking-wider border-b border-border">
+              <tr className="bg-white/[0.02] text-text-secondary text-xs uppercase tracking-wider border-b border-white/[0.06]">
                 <th className="p-4 font-medium w-16">Imagen</th>
                 <th className="p-4 font-medium">Nombre</th>
                 <th className="p-4 font-medium">Slug</th>

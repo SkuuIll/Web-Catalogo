@@ -106,12 +106,12 @@ export default function AdminPricesPage() {
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full">
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">Gestión de Precios</h1>
-        <p className="text-text-secondary">Hacé clic en el precio para editarlo. Presioná Enter o ✓ para guardar.</p>
+        <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gradient mb-1">Gestión de Precios</h1>
+        <p className="text-sm text-text-secondary">Hacé clic en el precio para editarlo. Presioná Enter o ✓ para guardar.</p>
       </div>
 
       {/* Bulk Update Panel */}
-      <div className="bg-card border border-border rounded-lg p-4 sm:p-5 mb-6">
+      <div className="bg-card/60 border border-white/[0.06] rounded-xl p-4 sm:p-5 mb-6">
         <h2 className="text-base font-bold mb-4 flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-accent" />
           Actualización Masiva
@@ -175,11 +175,11 @@ export default function AdminPricesPage() {
       </div>
 
       {/* Price Table */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
+      <div className="bg-card/60 border border-white/[0.06] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-secondary text-text-secondary text-xs uppercase tracking-wider border-b border-border">
+              <tr className="bg-white/[0.02] text-text-secondary text-xs uppercase tracking-wider border-b border-white/[0.06]">
                 <th className="p-4 w-10">
                   <input
                     type="checkbox"
