@@ -59,7 +59,7 @@ export default function ConfigPage() {
     finally { setSaving(false) }
   }
 
-  if (loading) return <div className="p-10 text-center text-text-secondary">Cargando configuración...</div>
+  if (loading) return <div className="p-10 text-center text-sm text-text-secondary">Cargando configuración...</div>
 
   const activeTabMeta = tabs.find(tab => tab.id === activeTab) || tabs[0]
   const ActiveIcon = activeTabMeta.icon
@@ -72,12 +72,12 @@ export default function ConfigPage() {
       ) : type === 'checkbox' ? (
         <div className="flex items-center mt-1">
           <input type="checkbox" name={name} checked={config?.[name] || false} onChange={handleChange} className="w-5 h-5 accent-accent" />
-          <span className="ml-2 text-sm text-text-secondary">{placeholder || 'Activar'}</span>
+          <span className="ml-2 text-sm text-sm text-text-secondary">{placeholder || 'Activar'}</span>
         </div>
       ) : (
         <input type={type} name={name} value={config?.[name] || ''} onChange={handleChange} placeholder={placeholder} className="w-full bg-secondary border border-border rounded-lg px-4 py-2.5 focus:border-accent outline-none transition-colors text-sm" />
       )}
-      {help && <p className="mt-1.5 text-xs leading-relaxed text-text-secondary">{help}</p>}
+      {help && <p className="mt-1.5 text-xs leading-relaxed text-sm text-text-secondary">{help}</p>}
     </div>
   )
 
@@ -141,8 +141,8 @@ export default function ConfigPage() {
       <div className="sticky top-0 md:top-0 z-20 -mx-4 mb-6 border-b border-border bg-bg-primary/90 px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6 md:-mx-10 md:px-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
         <div className="min-w-0">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">Configuración Global</h1>
-          <p className="text-text-secondary">Control central de tienda, contenido, SEO, IA y mantenimiento.</p>
+          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gradient mb-1">Configuración Global</h1>
+          <p className="text-sm text-text-secondary">Control central de tienda, contenido, SEO, IA y mantenimiento.</p>
         </div>
         <button onClick={handleSave} disabled={saving} className="w-full sm:w-auto justify-center bg-accent hover:bg-accent-hover text-black font-bold py-2.5 px-6 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -162,7 +162,7 @@ export default function ConfigPage() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`min-w-[180px] lg:min-w-0 text-left rounded-lg border px-4 py-3 transition-colors ${
-              activeTab === tab.id ? 'border-accent/40 bg-accent/10 text-white' : 'border-border bg-card text-text-secondary hover:border-white/20 hover:text-white'
+              activeTab === tab.id ? 'border-accent/40 bg-accent/10 text-white' : 'border-white/[0.06] bg-card/40 text-text-secondary hover:border-white/20 hover:text-white'
             }`}
           >
             <span className="flex items-center gap-3">
@@ -171,7 +171,7 @@ export default function ConfigPage() {
               </span>
               <span>
                 <span className="block text-sm font-bold">{tab.label}</span>
-                <span className="block text-xs text-text-secondary">{tab.desc}</span>
+                <span className="block text-xs text-sm text-text-secondary">{tab.desc}</span>
               </span>
             </span>
           </button>
@@ -181,15 +181,15 @@ export default function ConfigPage() {
       </div>
       </div>
 
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <div className="border-b border-border bg-secondary/35 p-4 sm:p-6">
+      <div className="bg-card/60 border border-white/[0.06] rounded-xl overflow-hidden">
+        <div className="border-b border-white/[0.06] bg-white/[0.02] p-4 sm:p-6">
           <div className="flex items-start gap-3">
             <div className="rounded-lg bg-accent/10 p-2 text-accent">
               <ActiveIcon className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-xl font-black text-white">{activeTabMeta.label}</h2>
-              <p className="mt-1 text-sm text-text-secondary">{activeTabMeta.desc}</p>
+              <p className="mt-1 text-sm text-sm text-text-secondary">{activeTabMeta.desc}</p>
             </div>
           </div>
         </div>
@@ -209,7 +209,7 @@ export default function ConfigPage() {
                 <Field label="Título de mantenimiento" name="maintenanceTitle" placeholder="Estamos realizando mejoras" />
                 <Field label="Mensaje de mantenimiento" name="maintenanceMessage" rows={3} placeholder="Volvemos pronto con novedades. Para consultas urgentes, escribinos por WhatsApp." />
               </div>
-              <p className="mt-3 text-xs text-text-secondary">El panel admin seguirá disponible para que puedas editar y desactivar este modo.</p>
+              <p className="mt-3 text-xs text-sm text-text-secondary">El panel admin seguirá disponible para que puedas editar y desactivar este modo.</p>
             </div>
           </div>
         )}
@@ -236,7 +236,7 @@ export default function ConfigPage() {
             </div>
             <Field label="Habilitar Botón Flotante" name="whatsappButtonEnabled" type="checkbox" placeholder="Mostrar en la tienda" />
             <Field label="Mensaje Predeterminado" name="whatsappMessage" placeholder="Hola! Me interesa el producto: {productName} - Precio: ${price} ARS." rows={3} />
-            <p className="text-xs text-text-secondary">Variables disponibles: {'{productName}'}, {'{price}'}</p>
+            <p className="text-xs text-sm text-text-secondary">Variables disponibles: {'{productName}'}, {'{price}'}</p>
           </div>
         )}
 
@@ -280,7 +280,7 @@ export default function ConfigPage() {
         {/* Footer */}
         {activeTab === 'paginas' && (
           <div className="space-y-6">
-            <div className="rounded-lg border border-accent/20 bg-accent/10 p-4 text-sm text-text-secondary">
+            <div className="rounded-lg border border-accent/20 bg-accent/10 p-4 text-sm text-sm text-text-secondary">
               Estos textos aparecen en las páginas públicas del footer. Podés editarlos cuando cambien tus políticas de venta.
             </div>
             <div className="space-y-5">
@@ -326,7 +326,7 @@ export default function ConfigPage() {
               </div>
               <Field label="API Key de IA" name="aiApiKey" type="password" placeholder={config?.aiApiKeyConfigured ? 'Ya hay una API key guardada. Pegá otra solo si querés reemplazarla.' : 'Pegá la API key del proveedor elegido'} help={config?.aiApiKeyConfigured ? 'Por seguridad, la API key guardada no se muestra en pantalla.' : undefined} />
             </div>
-            <div className="rounded-lg border border-accent/20 bg-accent/10 p-4 text-sm text-text-secondary">
+            <div className="rounded-lg border border-accent/20 bg-accent/10 p-4 text-sm text-sm text-text-secondary">
               <p className="font-semibold text-accent">Qué genera la IA</p>
               <p className="mt-1">Descripción corta, descripción completa y mensaje personalizado de WhatsApp usando nombre, categoría, precio y stock del producto. El prompt evita inventar datos técnicos si no existen.</p>
             </div>
@@ -338,3 +338,4 @@ export default function ConfigPage() {
     </div>
   )
 }
+

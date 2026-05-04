@@ -30,17 +30,17 @@ export default function ImportExportPage() {
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-4xl mx-auto w-full">
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">Importar / Exportar</h1>
-        <p className="text-text-secondary">Gestioná productos en lote con archivos CSV.</p>
+        <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gradient mb-1">Importar / Exportar</h1>
+        <p className="text-sm text-text-secondary">Gestioná productos en lote con archivos CSV.</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <a href="/api/products/export" className="rounded-lg border border-border bg-card p-6 hover:border-accent/40 transition-colors">
+        <a href="/api/products/export" className="rounded-lg border border-white/[0.06] bg-card/40 p-6 hover:border-accent/40 transition-colors">
           <Download className="w-8 h-8 text-accent mb-4" />
           <h2 className="text-lg font-bold text-white">Exportar catálogo</h2>
           <p className="text-sm text-text-secondary mt-2">Descargá todos los productos en formato CSV.</p>
           <span className="mt-5 inline-flex rounded-lg bg-accent px-4 py-2 text-sm font-bold text-black">Descargar CSV</span>
         </a>
-        <label className="rounded-lg border border-dashed border-border bg-card p-6 hover:border-accent/40 transition-colors cursor-pointer">
+        <label className="rounded-lg border border-dashed border-white/[0.06] bg-card/40 p-6 hover:border-accent/40 transition-colors cursor-pointer">
           {loading ? <Loader2 className="w-8 h-8 text-accent mb-4 animate-spin" /> : <Upload className="w-8 h-8 text-accent mb-4" />}
           <h2 className="text-lg font-bold text-white">Importar productos</h2>
           <p className="text-sm text-text-secondary mt-2">Subí un CSV con columnas como name, category, price, stock, brand, model, sizes, colors.</p>
@@ -51,3 +51,4 @@ export default function ImportExportPage() {
     </div>
   )
 }
+

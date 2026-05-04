@@ -50,17 +50,17 @@ export default function AdminImagesPage() {
     }
   }
 
-  if (loading) return <div className="p-10 text-center text-text-secondary">Cargando imágenes...</div>
+  if (loading) return <div className="p-10 text-center text-sm text-text-secondary">Cargando imágenes...</div>
 
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full">
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">Gestor de Imágenes</h1>
-        <p className="text-text-secondary">Todas las imágenes de productos en un solo lugar. Total: {images.length}</p>
+        <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gradient mb-1">Gestor de Imágenes</h1>
+        <p className="text-sm text-text-secondary">Todas las imágenes de productos en un solo lugar. Total: {images.length}</p>
       </div>
 
       {images.length === 0 ? (
-        <div className="text-center py-16 md:py-20 bg-card border border-border rounded-lg px-4">
+        <div className="text-center py-16 md:py-20 bg-card/60 border border-white/[0.06] rounded-xl px-4">
           <ImageIcon className="w-16 h-16 mx-auto text-text-secondary/30 mb-4" />
           <p className="text-text-secondary text-lg">No hay imágenes cargadas.</p>
           <p className="text-text-secondary text-sm mt-2">Subí imágenes desde la página de edición de cada producto.</p>
@@ -68,7 +68,7 @@ export default function AdminImagesPage() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
           {images.map((img) => (
-            <div key={img.id} className="group bg-card border border-border rounded-lg overflow-hidden hover:border-accent/30 transition-colors">
+            <div key={img.id} className="group bg-card/60 border border-white/[0.06] rounded-xl overflow-hidden hover:border-accent/30 transition-colors">
               <div className="relative aspect-square">
                 <Image src={img.url} alt={img.altText || ''} fill className="object-cover" sizes="200px" />
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -93,3 +93,4 @@ export default function AdminImagesPage() {
     </div>
   )
 }
+

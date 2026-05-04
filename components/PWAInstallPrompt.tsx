@@ -74,7 +74,7 @@ export function PWAInstallPrompt() {
           
           {isIOS ? (
             <div className="text-[11px] text-text-secondary leading-relaxed">
-              Instalá la app para un acceso más rápido. Tocá <Share className="inline w-3 h-3 mx-0.5 align-text-bottom" /> y luego <span className="font-bold text-white">"Agregar a inicio"</span> <PlusSquare className="inline w-3 h-3 mx-0.5 align-text-bottom" />
+              Instalá la app para un acceso más rápido. Tocá <Share className="inline w-3 h-3 mx-0.5 align-text-bottom" /> y luego <span className="font-bold text-white">&quot;Agregar a inicio&quot;</span> <PlusSquare className="inline w-3 h-3 mx-0.5 align-text-bottom" />
             </div>
           ) : (
             <>
