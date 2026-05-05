@@ -10,6 +10,7 @@ export default function NewProductPage() {
   const router = useRouter()
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(false)
+  const [uploadingImages, setUploadingImages] = useState(false)
   const [generatingAI, setGeneratingAI] = useState(false)
   const { success, error: toastError } = useToast()
   
@@ -122,7 +123,7 @@ export default function NewProductPage() {
         const newProduct = await res.json()
         
         if (pendingFiles.length > 0 || pendingUrls.length > 0) {
-          success('Producto guardado. Subiendo imágenes...')
+          setUploadingImages(true)
         }
         
         for (const file of pendingFiles) {
@@ -148,6 +149,7 @@ export default function NewProductPage() {
     } catch (err) {
       toastError('Error al crear producto.')
     } finally {
+      setUploadingImages(false)
       setLoading(false)
     }
   }
@@ -293,8 +295,9 @@ export default function NewProductPage() {
             </div>
 
             <div className="pt-6 flex justify-end">
-              <button type="submit" disabled={loading} className="w-full sm:w-auto bg-accent hover:bg-accent-hover text-black font-bold py-2.5 px-8 rounded-lg transition-colors disabled:opacity-50">
-                {loading ? 'Creando...' : 'Crear Producto'}
+              <button type="submit" disabled={loading || uploadingImages} className="w-full sm:w-auto bg-accent hover:bg-accent-hover text-black font-bold py-2.5 px-8 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                {(loading || uploadingImages) && <Loader2 className="w-5 h-5 animate-spin" />}
+                {uploadingImages ? 'Subiendo imágenes...' : loading ? 'Creando...' : 'Crear Producto'}
               </button>
             </div>
           </form>

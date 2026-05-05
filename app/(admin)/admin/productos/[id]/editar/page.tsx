@@ -356,11 +356,18 @@ export default function EditProductPage() {
           <h2 className="text-lg font-bold mb-4">Imágenes</h2>
 
           {/* Upload */}
-          <div className="mb-4">
-            <label className="block w-full border-2 border-dashed border-border hover:border-accent/50 rounded-xl p-6 text-center cursor-pointer transition-colors">
+          <div className="mb-4 relative">
+            <label className="block w-full border-2 border-dashed border-border hover:border-accent/50 rounded-xl p-6 text-center cursor-pointer transition-colors relative overflow-hidden">
               <Upload className="w-8 h-8 mx-auto text-text-secondary mb-2" />
               <span className="text-sm text-text-secondary">Arrastrá o hacé clic para subir</span>
-              <input type="file" accept="image/*" multiple onChange={handleFileUpload} className="hidden" />
+              <input type="file" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} className="hidden" />
+              
+              {uploading && (
+                <div className="absolute inset-0 bg-card/90 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                  <Loader2 className="w-8 h-8 animate-spin text-accent mb-2" />
+                  <span className="text-sm font-bold text-accent">Subiendo imágenes...</span>
+                </div>
+              )}
             </label>
           </div>
 
@@ -378,7 +385,7 @@ export default function EditProductPage() {
             </button>
           </div>
 
-          {uploading && <p className="text-xs text-accent mb-3">Subiendo...</p>}
+
 
           {/* Image grid */}
           <div className="grid grid-cols-2 gap-2">
