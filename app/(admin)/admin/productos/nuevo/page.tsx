@@ -104,7 +104,11 @@ export default function NewProductPage() {
     }
 
     let slug = formData.slug
-    if (!slug) slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+    if (!slug) {
+      const baseSlug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+      const randomSuffix = Math.random().toString(36).substring(2, 6)
+      slug = `${baseSlug}-${randomSuffix}`
+    }
 
     try {
       const res = await fetch('/api/products', {
@@ -330,9 +334,9 @@ export default function NewProductPage() {
 
           <div className="grid grid-cols-2 gap-2">
             {pendingFiles.map((file, i) => (
-              <div key={`file-${i}`} className="relative rounded-lg overflow-hidden border border-white/5 p-2 bg-secondary flex items-center justify-center text-xs text-center break-all h-24">
-                {file.name}
-                <button type="button" onClick={() => removePendingFile(i)} className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full hover:bg-red-500 transition-colors">
+              <div key={`file-${i}`} className="relative rounded-lg overflow-hidden border border-white/5 h-24">
+                <Image src={URL.createObjectURL(file)} alt="preview" fill className="object-cover" sizes="120px" unoptimized />
+                <button type="button" onClick={() => removePendingFile(i)} className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full hover:bg-red-500 transition-colors z-10">
                   <Trash2 className="w-3 h-3 text-white" />
                 </button>
               </div>
