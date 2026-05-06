@@ -139,6 +139,7 @@ export default function NewProductPage() {
       
       if (res.ok) {
         const newProduct = await res.json()
+        let hasErrors = false;
         
         if (pendingFiles.length > 0 || pendingUrls.length > 0) {
           setUploadingImages(true)
@@ -147,9 +148,15 @@ export default function NewProductPage() {
         for (const file of pendingFiles) {
           const fd = new FormData()
           fd.append('file', file)
-          const imgRes = await fetch(`/api/products/${newProduct.id}/images`, { method: 'POST', body: fd }).catch(() => null)
+          const imgRes = await fetch(`/api/products/${newProduct.id}/images`, { method: 'POST', body: fd }).catch(e => {
+            console.error(e);
+            return null;
+          })
+          
           if (!imgRes || !imgRes.ok) {
-            toastError(`Error al subir imagen: ${file.name}`)
+            hasErrors = true;
+            const errText = imgRes ? await imgRes.text().catch(() => 'Error desconocido') : 'Error de red';
+            toastError(`Error al subir imagen ${file.name}: ${errText.slice(0, 50)}`)
           }
         }
         
@@ -160,15 +167,22 @@ export default function NewProductPage() {
             body: JSON.stringify({ url })
           }).catch(() => null)
           if (!imgRes || !imgRes.ok) {
+            hasErrors = true;
             toastError(`Error al subir imagen desde URL`)
           }
         }
 
-        success('Producto creado correctamente.')
-        router.push('/admin/productos')
+        if (hasErrors) {
+          success('Producto creado, pero hubo errores con algunas imágenes. Revisalas en la edición.');
+          router.push(`/admin/productos/${newProduct.id}/editar`);
+        } else {
+          success('Producto e imágenes creados correctamente.')
+          router.push('/admin/productos')
+        }
         router.refresh()
       } else {
-        toastError('Error al crear producto. Verificá que el slug no esté en uso.')
+        const errData = await res.json().catch(() => ({}));
+        toastError(errData.error || 'Error al crear producto. Verificá que el slug no esté en uso.')
       }
     } catch (err) {
       toastError('Error al crear producto.')
