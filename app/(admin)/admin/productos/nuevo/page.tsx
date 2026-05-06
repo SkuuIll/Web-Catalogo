@@ -125,67 +125,37 @@ export default function NewProductPage() {
     }
 
     try {
+      if (pendingFiles.length > 0 || pendingUrls.length > 0) {
+        setUploadingImages(true)
+      }
+
+      const fd = new FormData();
+      fd.append('data', JSON.stringify({
+        ...formData,
+        slug,
+        price: parseFloat(formData.price),
+        compareAtPrice: formData.compareAtPrice ? parseFloat(formData.compareAtPrice) : null,
+        stock: parseInt(formData.stock, 10),
+      }));
+
+      pendingFiles.forEach(file => fd.append('images', file));
+      pendingUrls.forEach(url => fd.append('imageUrls', url));
+
       const res = await fetch('/api/products', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          slug,
-          price: parseFloat(formData.price),
-          compareAtPrice: formData.compareAtPrice ? parseFloat(formData.compareAtPrice) : null,
-          stock: parseInt(formData.stock, 10),
-        })
+        body: fd
       })
       
       if (res.ok) {
-        const newProduct = await res.json()
-        let hasErrors = false;
-        
-        if (pendingFiles.length > 0 || pendingUrls.length > 0) {
-          setUploadingImages(true)
-        }
-        
-        for (const file of pendingFiles) {
-          const fd = new FormData()
-          fd.append('file', file)
-          const imgRes = await fetch(`/api/products/${newProduct.id}/images`, { method: 'POST', body: fd }).catch(e => {
-            console.error(e);
-            return null;
-          })
-          
-          if (!imgRes || !imgRes.ok) {
-            hasErrors = true;
-            const errText = imgRes ? await imgRes.text().catch(() => 'Error desconocido') : 'Error de red';
-            toastError(`Error al subir imagen ${file.name}: ${errText.slice(0, 50)}`)
-          }
-        }
-        
-        for (const url of pendingUrls) {
-          const imgRes = await fetch(`/api/products/${newProduct.id}/images`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url })
-          }).catch(() => null)
-          if (!imgRes || !imgRes.ok) {
-            hasErrors = true;
-            toastError(`Error al subir imagen desde URL`)
-          }
-        }
-
-        if (hasErrors) {
-          success('Producto creado, pero hubo errores con algunas imágenes. Revisalas en la edición.');
-          router.push(`/admin/productos/${newProduct.id}/editar`);
-        } else {
-          success('Producto e imágenes creados correctamente.')
-          router.push('/admin/productos')
-        }
+        success('Producto e imágenes creados correctamente.')
+        router.push('/admin/productos')
         router.refresh()
       } else {
         const errData = await res.json().catch(() => ({}));
         toastError(errData.error || 'Error al crear producto. Verificá que el slug no esté en uso.')
       }
     } catch (err) {
-      toastError('Error al crear producto.')
+      toastError('Error al crear producto y subir imágenes.')
     } finally {
       setUploadingImages(false)
       setLoading(false)

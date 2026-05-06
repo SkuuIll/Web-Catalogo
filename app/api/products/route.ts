@@ -2,6 +2,16 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { paginatedResponse, parsePagination, requireAdminSession, slugify } from '@/lib/api-utils';
 import { productCreateSchema, zodErrorMessage } from '@/lib/validation';
+import { validateImageFile, processAndSaveImage } from '@/lib/image-utils';
+
+function isSafeImageUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return ['http:', 'https:'].includes(url.protocol);
+  } catch {
+    return false;
+  }
+}
 
 export async function GET(request: Request) {
   try {
@@ -44,7 +54,6 @@ export async function GET(request: Request) {
       if (Number.isFinite(parsedMax)) whereClause.price.lte = parsedMax;
     }
 
-    // SQLite-compatible search (no mode:'insensitive', use contains only)
     if (search) {
       whereClause.OR = [
         { name: { contains: search } },
@@ -92,7 +101,14 @@ export async function POST(request: Request) {
     const session = await requireAdminSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
-    const parsed = productCreateSchema.safeParse(await request.json());
+    const formData = await request.formData();
+    const dataStr = formData.get('data');
+    
+    if (!dataStr || typeof dataStr !== 'string') {
+      return NextResponse.json({ error: 'Datos de producto inválidos' }, { status: 400 });
+    }
+
+    const parsed = productCreateSchema.safeParse(JSON.parse(dataStr));
     if (!parsed.success) {
       return NextResponse.json({ error: zodErrorMessage(parsed.error) }, { status: 400 });
     }
@@ -125,8 +141,45 @@ export async function POST(request: Request) {
         metaKeywords: data.metaKeywords || null,
         ogImageUrl: data.ogImageUrl || null,
       },
-      include: { category: true, images: { orderBy: { sortOrder: 'asc' } } },
     });
+
+    const files = formData.getAll('images') as File[];
+    const urls = formData.getAll('imageUrls') as string[];
+    
+    let sortOrder = 0;
+    
+    for (const url of urls) {
+      if (!isSafeImageUrl(url)) continue;
+      await prisma.productImage.create({
+        data: {
+          productId: product.id,
+          url,
+          altText: '',
+          sourceType: 'URL',
+          isPrimary: sortOrder === 0,
+          sortOrder: sortOrder++,
+        }
+      });
+    }
+
+    for (const file of files) {
+      const validationError = validateImageFile(file);
+      if (!validationError) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const savedUrl = await processAndSaveImage(buffer, product.id, file.name);
+        await prisma.productImage.create({
+          data: {
+            productId: product.id,
+            url: savedUrl,
+            altText: '',
+            sourceType: 'UPLOAD',
+            localPath: savedUrl,
+            isPrimary: sortOrder === 0,
+            sortOrder: sortOrder++,
+          }
+        });
+      }
+    }
 
     return NextResponse.json(product, { status: 201 });
   } catch (error: any) {
