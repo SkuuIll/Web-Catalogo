@@ -11,6 +11,8 @@ type GalleryImage = {
   isPrimary?: boolean
 }
 
+import { createPortal } from 'react-dom'
+
 export function ProductGallery({ images, productName }: { images: GalleryImage[]; productName: string }) {
   const orderedImages = images.length > 0 ? images : [{ id: 'placeholder', url: '/placeholder.png', altText: productName }]
   const primary = orderedImages.find((image) => image.isPrimary) || orderedImages[0]
@@ -20,6 +22,7 @@ export function ProductGallery({ images, productName }: { images: GalleryImage[]
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   const goNext = () => setSelectedIdx((i) => (i + 1) % orderedImages.length)
   const goPrev = () => setSelectedIdx((i) => (i - 1 + orderedImages.length) % orderedImages.length)
@@ -41,6 +44,7 @@ export function ProductGallery({ images, productName }: { images: GalleryImage[]
   }
 
   useEffect(() => {
+    setMounted(true)
     if (isFullscreen) document.body.style.overflow = 'hidden'
     else document.body.style.overflow = 'unset'
     return () => { document.body.style.overflow = 'unset' }
@@ -125,8 +129,8 @@ export function ProductGallery({ images, productName }: { images: GalleryImage[]
         )}
       </div>
 
-      {/* Fullscreen Modal */}
-      {isFullscreen && (
+      {/* Fullscreen Modal via Portal */}
+      {isFullscreen && mounted && createPortal(
         <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl animate-in fade-in duration-200">
           <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20 bg-gradient-to-b from-black/80 to-transparent">
             <div className="flex items-center gap-3">
@@ -174,7 +178,8 @@ export function ProductGallery({ images, productName }: { images: GalleryImage[]
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
