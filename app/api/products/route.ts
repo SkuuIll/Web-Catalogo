@@ -7,7 +7,20 @@ import { validateImageFile, processAndSaveImage } from '@/lib/image-utils';
 function isSafeImageUrl(value: string) {
   try {
     const url = new URL(value);
-    return ['http:', 'https:'].includes(url.protocol);
+    if (!['http:', 'https:'].includes(url.protocol)) return false;
+    const blockedHosts = ['localhost', '127.0.0.1', '0.0.0.0', '[::1]'];
+    if (blockedHosts.includes(url.hostname)) return false;
+    const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+    const ipMatch = url.hostname.match(ipv4Regex);
+    if (ipMatch) {
+      const parts = [parseInt(ipMatch[1]), parseInt(ipMatch[2]), parseInt(ipMatch[3]), parseInt(ipMatch[4])];
+      if (parts[0] === 10) return false;
+      if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return false;
+      if (parts[0] === 192 && parts[1] === 168) return false;
+      if (parts[0] === 127) return false;
+      if (parts[0] === 169 && parts[1] === 254) return false;
+    }
+    return true;
   } catch {
     return false;
   }
@@ -92,6 +105,7 @@ export async function GET(request: Request) {
     }
     return NextResponse.json(products);
   } catch (error) {
+    console.error('Error fetching products:', error);
     return NextResponse.json({ error: 'Error al obtener productos' }, { status: 500 });
   }
 }
@@ -121,7 +135,7 @@ export async function POST(request: Request) {
 
     // Pre-validate all files before creating the product
     for (const file of files) {
-      if (!file || typeof file === 'string' || !file.arrayBuffer) {
+      if (!file || typeof file === 'string') {
          return NextResponse.json({ error: 'Archivo inválido enviado' }, { status: 400 });
       }
       const validationError = validateImageFile(file);
@@ -174,8 +188,12 @@ export async function POST(request: Request) {
     }
 
     for (const file of files) {
-      const validationError = validateImageFile(file);
-      if (!validationError) {
+      try {
+        const validationError = validateImageFile(file);
+        if (validationError) {
+          console.error('Image validation failed:', validationError, file.name);
+          continue;
+        }
         const buffer = Buffer.from(await file.arrayBuffer());
         const savedUrl = await processAndSaveImage(buffer, product.id, file.name);
         await prisma.productImage.create({
@@ -189,11 +207,14 @@ export async function POST(request: Request) {
             sortOrder: sortOrder++,
           }
         });
+      } catch (fileError) {
+        console.error('Error processing image file:', file.name, fileError);
       }
     }
 
     return NextResponse.json(product, { status: 201 });
   } catch (error: any) {
+    console.error('Error creating product:', error);
     if (error?.code === 'P2002') {
       return NextResponse.json({ error: 'Ya existe un producto con ese slug. Cambiá el nombre o el slug.' }, { status: 409 });
     }

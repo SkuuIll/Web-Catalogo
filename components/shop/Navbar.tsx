@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import NextImage from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Search, Zap, ChevronRight } from 'lucide-react'
 
@@ -34,7 +35,7 @@ export function Navbar({ config }: { config: any }) {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
           {config?.logoUrl ? (
-            <img src={config.logoUrl} alt={config.siteName} className="h-10 group-hover:scale-105 transition-transform duration-300" />
+            <NextImage src={config.logoUrl} alt={config.siteName} width={40} height={40} className="h-10 w-auto group-hover:scale-105 transition-transform duration-300" unoptimized />
           ) : (
             <>
               <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-accent via-amber-400 to-yellow-500 flex items-center justify-center shadow-lg shadow-accent/25 group-hover:shadow-accent/40 transition-all duration-300 group-hover:scale-105">

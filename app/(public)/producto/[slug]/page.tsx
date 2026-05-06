@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { formatPriceARS } from '@/lib/price-formatter';
-import { ArrowLeft, ShieldCheck, Truck, Ruler, Palette, BadgeCheck, Wrench, ChevronRight, Share2, Heart } from 'lucide-react';
+import { ShieldCheck, Truck, Ruler, Palette, BadgeCheck, Wrench, ChevronRight } from 'lucide-react';
 import { generateProductWhatsAppMessage } from '@/lib/whatsapp';
 import { ProductCard } from '@/components/shop/ProductCard';
 import { WhatsAppTrackedLink } from '@/components/shop/WhatsAppTrackedLink';
@@ -46,10 +46,16 @@ export default async function ProductoPage({ params }: { params: { slug: string 
     notFound();
   }
 
-  await prisma.product.update({
-    where: { id: product.id },
-    data: { viewCount: { increment: 1 } },
-  }).catch(() => undefined);
+  const requestHeaders = headers();
+  const userAgent = requestHeaders.get('user-agent') || '';
+  const isBot = /bot|crawler|spider|googlebot|facebookexternalhit|twitterbot|slurp|duckduckbot|baiduspider|yandex|linkedinbot|embedly|pinterest|whatsapp/i.test(userAgent);
+
+  if (!isBot) {
+    await prisma.product.update({
+      where: { id: product.id },
+      data: { viewCount: { increment: 1 } },
+    }).catch(() => undefined);
+  }
 
   const relatedProducts = await prisma.product.findMany({
     where: {
@@ -65,7 +71,8 @@ export default async function ProductoPage({ params }: { params: { slug: string 
   const price = formatPriceARS(Number(product.price));
   const primaryImage = product.images?.find((img: any) => img.isPrimary) || product.images?.[0];
   const imageUrl = primaryImage ? primaryImage.url : '/placeholder.png';
-  const requestHeaders = headers();
+  const categoryName = product.category?.name || 'Sin categoría';
+  const categorySlug = product.category?.slug || '';
   const protocol = requestHeaders.get('x-forwarded-proto') || 'http';
   const host = requestHeaders.get('x-forwarded-host') || requestHeaders.get('host') || 'localhost:3000';
   const productUrl = `${protocol}://${host}/producto/${product.slug}`;
@@ -94,7 +101,7 @@ export default async function ProductoPage({ params }: { params: { slug: string 
     description: product.metaDescription || product.shortDescription || product.description || undefined,
     image: imageUrl ? [absoluteImageUrl] : undefined,
     brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
-    category: product.category.name,
+    category: product.category?.name || '',
     offers: {
       '@type': 'Offer',
       url: productUrl,
@@ -115,7 +122,7 @@ export default async function ProductoPage({ params }: { params: { slug: string 
         <nav className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm mb-3 sm:mb-6 fade-up">
           <Link href="/catalogo" className="text-text-secondary hover:text-accent transition-colors">Catálogo</Link>
           <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-text-secondary/40" />
-          <Link href={`/categorias/${product.category.slug}`} className="text-text-secondary hover:text-accent transition-colors truncate max-w-[100px] sm:max-w-none">{product.category.name}</Link>
+          <Link href={`/categorias/${categorySlug}`} className="text-text-secondary hover:text-accent transition-colors truncate max-w-[100px] sm:max-w-none">{categoryName}</Link>
           <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-text-secondary/40" />
           <span className="text-white font-medium truncate max-w-[120px] sm:max-w-[200px]">{product.name}</span>
         </nav>
@@ -127,7 +134,7 @@ export default async function ProductoPage({ params }: { params: { slug: string 
               {/* Category badge */}
               <div className="absolute top-3 left-3 sm:top-5 sm:left-5 z-10 flex items-center gap-1.5 sm:gap-2">
                 <span className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-full bg-accent/15 border border-accent/25 text-accent font-bold text-[10px] sm:text-[11px] uppercase tracking-wider backdrop-blur-sm">
-                  {product.category.name}
+                  {categoryName}
                 </span>
                 {hasDiscount && (
                   <span className="px-2.5 py-1.5 rounded-full bg-red-500/80 text-[11px] font-black text-white">
@@ -250,7 +257,7 @@ export default async function ProductoPage({ params }: { params: { slug: string 
                 <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-accent">También te puede interesar</p>
                 <h2 className="text-2xl md:text-3xl font-black text-gradient">Productos relacionados</h2>
               </div>
-              <Link href={`/categorias/${product.category.slug}`} className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-white/[0.06] px-4 py-2 text-sm font-bold text-text-secondary hover:border-accent/30 hover:text-accent hover:bg-accent/[0.05] transition-all duration-300">
+              <Link href={`/categorias/${categorySlug}`} className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-white/[0.06] px-4 py-2 text-sm font-bold text-text-secondary hover:border-accent/30 hover:text-accent hover:bg-accent/[0.05] transition-all duration-300">
                 Ver categoría
               </Link>
             </div>

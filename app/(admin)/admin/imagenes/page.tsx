@@ -13,7 +13,7 @@ export default function AdminImagesPage() {
 
   useEffect(() => {
     // Fetch all product images
-    fetch('/api/products')
+    fetch('/api/products?includeInactive=true')
       .then(r => r.json())
       .then((products: any[]) => {
         const allImages = products.flatMap((p: any) =>
@@ -45,7 +45,8 @@ export default function AdminImagesPage() {
       } else {
         toastError('Error al eliminar imagen.')
       }
-    } catch {
+    } catch (err) {
+      console.error('Delete image error:', err);
       toastError('Error al eliminar imagen.')
     }
   }

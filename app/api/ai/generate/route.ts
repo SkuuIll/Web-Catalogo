@@ -108,9 +108,9 @@ export async function POST(request: Request) {
     let generated: GeneratedProductCopy | null = null;
 
     if (provider === 'GEMINI') {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
@@ -241,6 +241,6 @@ export async function POST(request: Request) {
     return NextResponse.json(generated);
   } catch (error: any) {
     console.error('Error in AI generation:', error);
-    return NextResponse.json({ error: error.message || 'Error al generar la descripción con IA' }, { status: 500 });
+    return NextResponse.json({ error: 'Error al generar la descripción con IA' }, { status: 500 });
   }
 }

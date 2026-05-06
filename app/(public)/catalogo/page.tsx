@@ -114,9 +114,8 @@ export default function CatalogoPage() {
   }, [filtersReady, debouncedSearch, categoryId, sort, brand, size, color, inStock, minPrice, maxPrice, page])
 
   const featured = products.find(p => p.featured)
-  const rest = products.filter(p => !p.featured || p !== featured)
-  const allDisplay = featured ? [featured, ...rest] : products
-  const hasMore = allDisplay.length < total
+  const rest = featured ? products.filter(p => p.id !== featured.id) : products
+  const hasMore = (featured ? 1 : 0) + rest.length < total
 
   const clearFilters = () => { setSearch(''); setCategoryId(''); setSort('newest'); setBrand(''); setSize(''); setColor(''); setInStock(false); setMinPrice(''); setMaxPrice('') }
   const hasActiveFilters = search || categoryId || sort !== 'newest' || brand || size || color || inStock || minPrice || maxPrice
@@ -270,8 +269,11 @@ export default function CatalogoPage() {
                 className="w-full bg-secondary border border-border rounded-xl px-3 py-2.5 text-sm text-white focus:border-accent outline-none"
               >
                 <option value="newest">Más nuevos</option>
+                <option value="featured">Destacados</option>
+                <option value="name_asc">Nombre A-Z</option>
                 <option value="price_asc">Precio: menor a mayor</option>
                 <option value="price_desc">Precio: mayor a menor</option>
+                <option value="stock_asc">Menor stock</option>
               </select>
             </div>
             <div className="grid grid-cols-1 gap-3">
@@ -300,7 +302,7 @@ export default function CatalogoPage() {
               <SkeletonCard key={i} />
             ))}
           </div>
-        ) : allDisplay.length === 0 ? (
+        ) : (featured ? 1 : 0) + rest.length === 0 ? (
           <div className="text-center py-20 bg-card/30 backdrop-blur-md rounded-xl border border-white/[0.06]">
             <Search className="w-12 h-12 mx-auto text-text-secondary/20 mb-4" />
             <p className="text-xl text-text-secondary font-bold">Sin resultados para tu búsqueda.</p>
@@ -310,12 +312,12 @@ export default function CatalogoPage() {
         ) : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">
-              {allDisplay.map((product, idx) => {
-                if (idx === 0 && product.featured && !debouncedSearch && !categoryId) {
-                  return <FeaturedProductCard key={product.id} product={product} />
-                }
-                return <ProductCard key={product.id} product={product} config={config} />
-              })}
+              {featured && !debouncedSearch && !categoryId && (
+                <FeaturedProductCard key={featured.id} product={featured} />
+              )}
+              {rest.map((product) => (
+                <ProductCard key={product.id} product={product} config={config} />
+              ))}
             </div>
 
             {/* Load more */}

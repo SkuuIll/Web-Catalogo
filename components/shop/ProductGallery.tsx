@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { createPortal } from 'react-dom'
 import { ImageIcon, ZoomIn, ChevronLeft, ChevronRight, X } from 'lucide-react'
 
 type GalleryImage = {
@@ -10,8 +11,6 @@ type GalleryImage = {
   altText?: string | null
   isPrimary?: boolean
 }
-
-import { createPortal } from 'react-dom'
 
 export function ProductGallery({ images, productName }: { images: GalleryImage[]; productName: string }) {
   const orderedImages = images.length > 0 ? images : [{ id: 'placeholder', url: '/placeholder.png', altText: productName }]

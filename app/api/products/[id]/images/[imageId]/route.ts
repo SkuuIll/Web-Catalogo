@@ -43,6 +43,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Imagen eliminada correctamente' });
   } catch (error) {
+    console.error('Error deleting image:', error);
     return NextResponse.json({ error: 'Error al eliminar imagen' }, { status: 500 });
   }
 }
@@ -72,6 +73,7 @@ export async function PUT(
 
     return NextResponse.json(updated);
   } catch (error) {
+    console.error('Error setting primary image:', error);
     return NextResponse.json({ error: 'Error al marcar imagen principal' }, { status: 500 });
   }
 }

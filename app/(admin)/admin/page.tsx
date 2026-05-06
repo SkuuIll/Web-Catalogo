@@ -1,25 +1,33 @@
 import React from 'react';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
-import { AlertTriangle, BarChart3, ImageOff, Package, Tag, Eye, Plus, DollarSign, Settings, Image as ImageIcon, Megaphone, MessageCircle, ArrowRight, TrendingUp, Zap } from 'lucide-react';
+import { AlertTriangle, ImageOff, Package, Tag, Eye, Plus, DollarSign, Settings, Image as ImageIcon, Megaphone, MessageCircle, ArrowRight, TrendingUp, Zap } from 'lucide-react';
 
 export default async function AdminDashboardPage() {
-  const [productCount, categoryCount, viewsAgg, recentProducts, lowStock, noImageCount, inactiveCount, whatsappCount, topProducts] = await Promise.all([
-    prisma.product.count({ where: { active: true } }),
-    prisma.category.count({ where: { active: true } }),
-    prisma.product.aggregate({ _sum: { viewCount: true } }),
-    prisma.product.findMany({
-      where: { active: true },
-      include: { category: true },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    }),
-    prisma.product.findMany({ where: { active: true, stock: { lte: 3 } }, include: { category: true }, take: 6, orderBy: { stock: 'asc' } }),
-    prisma.product.count({ where: { active: true, images: { none: {} } } }),
-    prisma.product.count({ where: { active: false } }),
-    prisma.whatsAppClick.count(),
-    prisma.product.findMany({ where: { active: true }, include: { category: true }, orderBy: { viewCount: 'desc' }, take: 5 }),
-  ]);
+  let productCount = 0, categoryCount = 0, viewsAgg: any = { _sum: { viewCount: 0 } };
+  let recentProducts: any[] = [], lowStock: any[] = [], topProducts: any[] = [];
+  let noImageCount = 0, inactiveCount = 0, whatsappCount = 0;
+
+  try {
+    [productCount, categoryCount, viewsAgg, recentProducts, lowStock, noImageCount, inactiveCount, whatsappCount, topProducts] = await Promise.all([
+      prisma.product.count({ where: { active: true } }),
+      prisma.category.count({ where: { active: true } }),
+      prisma.product.aggregate({ _sum: { viewCount: true } }),
+      prisma.product.findMany({
+        where: { active: true },
+        include: { category: true },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      }),
+      prisma.product.findMany({ where: { active: true, stock: { lte: 3 } }, include: { category: true }, take: 6, orderBy: { stock: 'asc' } }),
+      prisma.product.count({ where: { active: true, images: { none: {} } } }),
+      prisma.product.count({ where: { active: false } }),
+      prisma.whatsAppClick.count(),
+      prisma.product.findMany({ where: { active: true }, include: { category: true }, orderBy: { viewCount: 'desc' }, take: 5 }),
+    ]);
+  } catch (error) {
+    console.error('Error loading admin dashboard:', error);
+  }
 
   const totalViews = viewsAgg._sum.viewCount || 0;
 

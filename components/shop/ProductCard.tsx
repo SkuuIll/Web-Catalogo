@@ -109,7 +109,7 @@ export function ProductCard({ product, config }: { product: any, config: any }) 
       {config?.whatsappNumber && (
         <button
           onClick={handleWA}
-          className="mx-3 mb-3 inline-flex items-center justify-center gap-2 rounded-lg border border-accent/20 bg-accent/[0.07] px-3 py-2 text-xs font-bold text-accent opacity-100 transition-all duration-300 hover:bg-accent hover:text-black hover:border-accent md:opacity-0 md:translate-y-1 md:group-hover:opacity-100 md:group-hover:translate-y-0"
+          className="mx-3 mb-3 inline-flex items-center justify-center gap-2 rounded-lg border border-accent/20 bg-accent/[0.07] px-3 py-2 text-xs font-bold text-accent transition-all duration-300 hover:bg-accent hover:text-black hover:border-accent md:opacity-0 md:translate-y-1 md:group-hover:opacity-100 md:group-hover:translate-y-0 md:focus-within:opacity-100 md:focus-within:translate-y-0 md:focus-visible:opacity-100 md:focus-visible:translate-y-0"
         >
           <MessageCircle className="w-3.5 h-3.5" />
           Consultar

@@ -18,7 +18,8 @@ export async function POST(request: Request) {
       },
     });
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    console.error('Error tracking WhatsApp click:', error);
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 }

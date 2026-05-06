@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
+import NextImage from 'next/image'
 import { Plus, Edit2, Trash2, X, Check, Loader2, Upload } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
@@ -33,7 +34,8 @@ export default function AdminCategoriesPage() {
       } else {
         toastError(data.error || 'Error al subir imagen')
       }
-    } catch {
+    } catch (err) {
+      console.error('Image upload error:', err);
       toastError('Error al subir imagen')
     } finally {
       setUploading(false)
@@ -41,7 +43,7 @@ export default function AdminCategoriesPage() {
   }
 
   const loadCategories = () => {
-    fetch('/api/categories')
+    fetch('/api/categories?includeInactive=true')
       .then(r => r.json())
       .then(data => { setCategories(Array.isArray(data) ? data : []); setLoading(false) })
       .catch(() => setLoading(false))
@@ -89,7 +91,7 @@ export default function AdminCategoriesPage() {
       } else {
         toastError(data.error || 'Error al guardar categoría.')
       }
-    } catch { toastError('Error al guardar categoría.') }
+    } catch (err) { console.error('Save category error:', err); toastError('Error al guardar categoría.') }
     finally { setSaving(false) }
   }
 
@@ -125,7 +127,7 @@ export default function AdminCategoriesPage() {
       } else {
         toastError(data.error || 'Error al eliminar categoría.')
       }
-    } catch { toastError('Error al eliminar categoría.') }
+    } catch (err) { console.error('Delete category error:', err); toastError('Error al eliminar categoría.') }
     finally { setDeleting(null) }
   }
 
@@ -281,7 +283,7 @@ export default function AdminCategoriesPage() {
                   <td className="p-4">
                     {cat.imageUrl ? (
                       <div className="w-10 h-10 rounded-md overflow-hidden bg-secondary border border-border">
-                        <img src={cat.imageUrl} alt={cat.name} className="w-full h-full object-cover" />
+                        <NextImage src={cat.imageUrl} alt={cat.name} width={40} height={40} className="w-full h-full object-cover" unoptimized />
                       </div>
                     ) : (
                       <div className="w-10 h-10 rounded-md bg-secondary border border-border flex items-center justify-center text-text-secondary text-[10px] leading-tight text-center p-1">Sin img</div>

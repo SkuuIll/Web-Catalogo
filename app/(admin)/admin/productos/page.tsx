@@ -155,6 +155,7 @@ export default function AdminProductsPage() {
           </select>
           <select value={sort} onChange={e => { setSort(e.target.value); setPage(1) }} className="h-11 rounded-lg border border-border bg-secondary px-3 text-sm text-white outline-none focus:border-accent">
             <option value="newest">Más nuevos</option>
+            <option value="featured">Destacados</option>
             <option value="name_asc">Nombre A-Z</option>
             <option value="price_asc">Precio menor</option>
             <option value="price_desc">Precio mayor</option>

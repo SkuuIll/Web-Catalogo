@@ -4,9 +4,43 @@ import { authOptions } from "@/lib/auth";
 export const DEFAULT_PAGE_SIZE = 12;
 export const MAX_PAGE_SIZE = 60;
 
-export async function requireAdminSession() {
+export async function requireAdminSession(requiredRole?: 'SUPER_ADMIN' | 'EDITOR') {
   const session = await getServerSession(authOptions);
+  if (!session) return null;
+  if (requiredRole && (session.user as any).role !== requiredRole) return null;
   return session;
+}
+
+export async function requireSuperAdmin() {
+  return requireAdminSession('SUPER_ADMIN');
+}
+
+// In-memory rate limiter
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+// Cleanup stale entries every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  rateLimitStore.forEach((entry, key) => {
+    if (now > entry.resetAt) rateLimitStore.delete(key);
+  });
+}, 10 * 60 * 1000).unref();
+
+export function checkRateLimit(key: string, maxAttempts: number, windowMs: number): boolean {
+  const now = Date.now();
+  const entry = rateLimitStore.get(key);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  if (entry.count >= maxAttempts) {
+    return false;
+  }
+
+  entry.count++;
+  return true;
 }
 
 export function parsePagination(searchParams: URLSearchParams, fallbackPageSize = DEFAULT_PAGE_SIZE) {

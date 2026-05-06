@@ -41,13 +41,14 @@ export async function PUT(request: Request) {
       });
     });
 
-    await Promise.all(updates);
+    await prisma.$transaction(updates);
 
     return NextResponse.json({
       message: `Precios actualizados para ${products.length} productos`,
       count: products.length,
     });
   } catch (error) {
+    console.error('Error updating bulk prices:', error);
     return NextResponse.json({ error: 'Error al actualizar precios' }, { status: 500 });
   }
 }

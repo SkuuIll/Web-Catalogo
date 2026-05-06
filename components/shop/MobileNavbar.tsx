@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import NextImage from 'next/image'
 import { Search, Zap } from 'lucide-react'
 
 export function MobileNavbar({ config }: { config: any }) {
@@ -23,7 +24,7 @@ export function MobileNavbar({ config }: { config: any }) {
       <div className="flex items-center justify-between px-4 h-[60px]">
         <Link href="/" className="flex items-center gap-2.5">
           {config?.logoUrl ? (
-            <img src={config.logoUrl} alt={config.siteName} className="h-8" />
+            <NextImage src={config.logoUrl} alt={config.siteName} width={32} height={32} className="h-8 w-auto" unoptimized />
           ) : (
             <>
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent via-amber-400 to-yellow-500 flex items-center justify-center shadow-lg shadow-accent/20">

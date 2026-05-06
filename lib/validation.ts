@@ -8,7 +8,7 @@ const nullableDate = z
   .optional()
   .transform((value) => (value ? new Date(value) : null));
 
-export const productStatusSchema = z.enum(["PUBLISHED", "PAUSED", "DRAFT"]);
+export const productStatusSchema = z.enum(["PUBLISHED", "PAUSED", "DRAFT", "SOLD_OUT"]);
 
 export const productCreateSchema = z.object({
   name: z.string().trim().min(1, "Nombre requerido").max(180),

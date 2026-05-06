@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdminSession, slugify } from '@/lib/api-utils';
+import { requireAdminSession, requireSuperAdmin, slugify } from '@/lib/api-utils';
 import { categoryUpdateSchema, zodErrorMessage } from '@/lib/validation';
 
 export async function PUT(
@@ -30,6 +30,7 @@ export async function PUT(
     });
     return NextResponse.json(category);
   } catch (error: any) {
+    console.error('Error updating category:', error);
     if (error?.code === 'P2002') {
       return NextResponse.json({ error: 'Ya existe una categoría con ese slug' }, { status: 409 });
     }
@@ -42,8 +43,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await requireAdminSession();
-    if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    const session = await requireSuperAdmin();
+    if (!session) return NextResponse.json({ error: 'No autorizado. Solo administradores principales pueden eliminar categorías.' }, { status: 401 });
 
     // Check if category has products
     const productCount = await prisma.product.count({ where: { categoryId: params.id } });
@@ -57,6 +58,7 @@ export async function DELETE(
     await prisma.category.delete({ where: { id: params.id } });
     return NextResponse.json({ message: 'Categoría eliminada correctamente' });
   } catch (error) {
+    console.error('Error deleting category:', error);
     return NextResponse.json({ error: 'Error al eliminar categoría' }, { status: 500 });
   }
 }

@@ -214,7 +214,8 @@ export default function EditProductPage() {
       } else {
         toastError('Error al marcar imagen principal.')
       }
-    } catch {
+    } catch (err) {
+      console.error('Set primary image error:', err);
       toastError('Error al marcar imagen principal.')
     }
   }

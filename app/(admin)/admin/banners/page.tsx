@@ -79,7 +79,7 @@ export default function AdminBannersPage() {
       const res = await fetch(`/api/banners/${id}`, { method: 'DELETE' })
       if (res.ok) { success('Banner eliminado.'); loadBanners() }
       else toastError('Error al eliminar banner.')
-    } catch { toastError('Error al eliminar banner.') }
+    } catch (err) { console.error('Delete banner error:', err); toastError('Error al eliminar banner.') }
   }
 
   if (loading) return <div className="p-10 text-center text-sm text-text-secondary">Cargando...</div>

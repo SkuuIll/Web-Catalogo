@@ -21,14 +21,14 @@ export default function NewProductPage() {
   const addSize = (size: string) => {
     setFormData(prev => ({
       ...prev,
-      sizes: prev.sizes ? (prev.sizes.includes(size) ? prev.sizes : `${prev.sizes}, ${size}`) : size
+      sizes: prev.sizes ? (prev.sizes.split(/,\s*/).includes(size) ? prev.sizes : `${prev.sizes}, ${size}`) : size
     }))
   }
   
   const addColor = (color: string) => {
     setFormData(prev => ({
       ...prev,
-      colors: prev.colors ? (prev.colors.includes(color) ? prev.colors : `${prev.colors}, ${color}`) : color
+      colors: prev.colors ? (prev.colors.split(/,\s*/).includes(color) ? prev.colors : `${prev.colors}, ${color}`) : color
     }))
   }
   
@@ -101,7 +101,8 @@ export default function NewProductPage() {
       } else {
         toastError(data.error || 'Error al generar con IA');
       }
-    } catch {
+    } catch (err) {
+      console.error('AI generate error:', err);
       toastError('Error de conexión con IA');
     } finally {
       setGeneratingAI(false);

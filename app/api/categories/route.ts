@@ -3,14 +3,18 @@ import { prisma } from '@/lib/prisma';
 import { requireAdminSession, slugify } from '@/lib/api-utils';
 import { categorySchema, zodErrorMessage } from '@/lib/validation';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const includeInactive = searchParams.get('includeInactive') === 'true';
+    const where = includeInactive ? {} : { active: true };
     const categories = await prisma.category.findMany({
-      where: { active: true },
+      where,
       orderBy: { sortOrder: 'asc' },
     });
     return NextResponse.json(categories);
   } catch (error) {
+    console.error('Error fetching categories:', error);
     return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
   }
 }
@@ -36,6 +40,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(category, { status: 201 });
   } catch (error: any) {
+    console.error('Error creating category:', error);
     if (error?.code === 'P2002') {
       return NextResponse.json({ error: 'Ya existe una categoría con ese slug' }, { status: 409 });
     }

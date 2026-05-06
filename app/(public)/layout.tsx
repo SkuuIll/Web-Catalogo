@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  const config = await prisma.siteConfig.findFirst();
+  const config = await prisma.siteConfig.findFirst().catch(() => null);
   if (config?.maintenanceMode) {
     return <MaintenanceScreen config={config} />;
   }

@@ -26,8 +26,9 @@ export function validateImageFile(file: File) {
   if (file.size > maxSize) {
     return `Archivo muy grande. Máximo ${Math.round(maxSize / 1024 / 1024)}MB`;
   }
-  if (!ALLOWED_IMAGE_MIME_TYPES.has(file.type)) {
-    return 'Formato no permitido. Usá JPG, PNG, WebP, GIF o AVIF.';
+  // Allow files with no type (sharp will validate server-side) or accepted types
+  if (file.type && !ALLOWED_IMAGE_MIME_TYPES.has(file.type)) {
+    return `Formato no permitido (${file.type || 'desconocido'}). Usá JPG, PNG, WebP, GIF o AVIF.`;
   }
   return null;
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdminSession } from '@/lib/api-utils';
+import { requireAdminSession, requireSuperAdmin } from '@/lib/api-utils';
 import { siteConfigSchema, zodErrorMessage } from '@/lib/validation';
 
 function redactConfig(config: any, isAdmin = false) {
@@ -27,15 +27,16 @@ export async function GET(request: Request) {
     }
     return NextResponse.json(redactConfig(config, wantsAdminConfig));
   } catch (error) {
+    console.error('Error fetching config:', error);
     return NextResponse.json({ error: 'Failed to fetch config' }, { status: 500 });
   }
 }
 
 export async function PUT(request: Request) {
   try {
-    const session = await requireAdminSession();
+    const session = await requireSuperAdmin();
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'No autorizado. Solo administradores principales pueden modificar la configuración.' }, { status: 401 });
     }
     const parsed = siteConfigSchema.safeParse(await request.json());
     if (!parsed.success) {
@@ -60,6 +61,7 @@ export async function PUT(request: Request) {
     });
     return NextResponse.json(redactConfig(config, true));
   } catch (error) {
+    console.error('Error updating config:', error);
     return NextResponse.json({ error: 'Failed to update config' }, { status: 500 });
   }
 }

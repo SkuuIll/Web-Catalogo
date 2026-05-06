@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdminSession, slugify } from '@/lib/api-utils';
+import { requireAdminSession, requireSuperAdmin, slugify } from '@/lib/api-utils';
 import { productUpdateSchema, zodErrorMessage } from '@/lib/validation';
 
 export async function GET(
@@ -20,6 +20,7 @@ export async function GET(
     }
     return NextResponse.json(product);
   } catch (error) {
+    console.error('Error fetching product:', error);
     return NextResponse.json({ error: 'Error al obtener producto' }, { status: 500 });
   }
 }
@@ -69,6 +70,7 @@ export async function PUT(
     });
     return NextResponse.json(product);
   } catch (error: any) {
+    console.error('Error updating product:', error);
     if (error?.code === 'P2002') {
       return NextResponse.json({ error: 'Ya existe un producto con ese slug.' }, { status: 409 });
     }
@@ -88,6 +90,8 @@ export async function DELETE(
     const hardDelete = searchParams.get('hard') === 'true';
 
     if (hardDelete) {
+      const superSession = await requireSuperAdmin();
+      if (!superSession) return NextResponse.json({ error: 'No autorizado. Solo administradores principales pueden eliminar productos definitivamente.' }, { status: 401 });
       await prisma.product.delete({ where: { id: params.id } });
       return NextResponse.json({ message: 'Producto eliminado definitivamente' });
     }
@@ -98,6 +102,7 @@ export async function DELETE(
     });
     return NextResponse.json({ message: 'Producto desactivado', product });
   } catch (error) {
+    console.error('Error deleting product:', error);
     return NextResponse.json({ error: 'Error al eliminar producto' }, { status: 500 });
   }
 }

@@ -19,7 +19,8 @@ export default function ImportExportPage() {
       const data = await res.json()
       if (res.ok) success(data.message || 'Importación completada.')
       else toastError(data.error || 'Error al importar.')
-    } catch {
+    } catch (err) {
+      console.error('Import error:', err);
       toastError('Error al importar.')
     } finally {
       setLoading(false)

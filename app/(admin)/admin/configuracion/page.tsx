@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
+import NextImage from 'next/image'
 import { useToast } from '@/components/ui/Toast'
 import {
   BadgeCheck,
@@ -55,7 +56,7 @@ export default function ConfigPage() {
       const res = await fetch('/api/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       if (res.ok) { const data = await res.json(); setConfig(data); setSaved(true); success('Configuración guardada correctamente.'); setTimeout(() => setSaved(false), 3000) }
       else toastError('Error al guardar configuración.')
-    } catch { toastError('Error al guardar configuración.') }
+    } catch (err) { console.error('Save config error:', err); toastError('Error al guardar configuración.') }
     finally { setSaving(false) }
   }
 
@@ -100,7 +101,8 @@ export default function ConfigPage() {
         } else {
           toastError(data.error || 'Error al subir imagen')
         }
-      } catch {
+      } catch (err) {
+        console.error('Image upload error:', err);
         toastError('Error al subir imagen')
       } finally {
         setUploading(false)
@@ -126,7 +128,7 @@ export default function ConfigPage() {
         </div>
         {config?.[name] && (
           <div className="relative mt-3 rounded-lg overflow-hidden border border-border bg-black/50 inline-block">
-            <img src={config[name]} alt="Preview" className="object-contain max-h-[120px] w-auto" />
+            <NextImage src={config[name]} alt="Preview" width={120} height={120} className="object-contain max-h-[120px] w-auto" unoptimized />
             <button type="button" onClick={() => setConfig((prev: any) => ({ ...prev, [name]: '' }))} className="absolute top-1 right-1 bg-red-500/80 p-1.5 rounded-full text-white hover:bg-red-500 transition-colors">
               <X className="w-3 h-3" />
             </button>

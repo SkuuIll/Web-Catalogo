@@ -27,6 +27,9 @@ export default function AdminPricesPage() {
       setProducts(Array.isArray(prods) ? prods : [])
       setCategories(Array.isArray(cats) ? cats : [])
       setLoading(false)
+    }).catch((err) => {
+      console.error('Error loading prices page:', err);
+      setLoading(false);
     })
   }, [])
 

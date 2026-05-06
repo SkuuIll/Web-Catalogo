@@ -97,10 +97,10 @@ export default async function HomePage() {
             <h2 className="text-2xl md:text-4xl font-black tracking-tight text-gradient">Productos para descubrir</h2>
             <p className="mt-3 max-w-2xl text-sm md:text-base text-text-secondary">Una selección visual para entrar rápido al producto, consultar stock y pedir más información por WhatsApp.</p>
           </div>
-          <a href="/catalogo" className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-white/[0.06] px-4 py-2 text-sm font-bold text-text-secondary transition-all duration-300 hover:border-accent/30 hover:text-accent hover:bg-accent/[0.05]">
+          <Link href="/catalogo" className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-white/[0.06] px-4 py-2 text-sm font-bold text-text-secondary transition-all duration-300 hover:border-accent/30 hover:text-accent hover:bg-accent/[0.05]">
             Ver todo
             <ArrowRight className="h-4 w-4" />
-          </a>
+          </Link>
         </div>
         {/* Featured + regular grid */}
         {(featured || regularProducts.length > 0) ? (
