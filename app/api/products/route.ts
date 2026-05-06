@@ -121,7 +121,7 @@ export async function POST(request: Request) {
 
     // Pre-validate all files before creating the product
     for (const file of files) {
-      if (!(file instanceof Blob)) {
+      if (!file || typeof file === 'string' || !file.arrayBuffer) {
          return NextResponse.json({ error: 'Archivo inválido enviado' }, { status: 400 });
       }
       const validationError = validateImageFile(file);

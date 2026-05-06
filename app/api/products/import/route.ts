@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
   const formData = await request.formData();
   const file = formData.get('file');
-  if (!(file instanceof File)) return NextResponse.json({ error: 'Archivo CSV requerido' }, { status: 400 });
+  if (!file || typeof file === 'string' || !file.text) return NextResponse.json({ error: 'Archivo CSV requerido' }, { status: 400 });
   if (file.size > 2 * 1024 * 1024) return NextResponse.json({ error: 'CSV demasiado grande. Máximo 2MB.' }, { status: 400 });
 
   const text = await file.text();
