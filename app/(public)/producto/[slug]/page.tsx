@@ -105,28 +105,28 @@ export default async function ProductoPage({ params }: { params: { slug: string 
   };
 
   return (
-    <div className="min-h-screen bg-bg-primary pt-6 md:pt-10 pb-24 md:pb-20 px-4">
+    <div className="min-h-screen bg-bg-primary pt-3 sm:pt-6 md:pt-10 pb-24 md:pb-20 px-3 sm:px-4">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
       />
       <div className="container mx-auto max-w-6xl">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm mb-6 fade-up">
+        <nav className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm mb-3 sm:mb-6 fade-up">
           <Link href="/catalogo" className="text-text-secondary hover:text-accent transition-colors">Catálogo</Link>
-          <ChevronRight className="w-3.5 h-3.5 text-text-secondary/40" />
-          <Link href={`/categorias/${product.category.slug}`} className="text-text-secondary hover:text-accent transition-colors">{product.category.name}</Link>
-          <ChevronRight className="w-3.5 h-3.5 text-text-secondary/40" />
-          <span className="text-white font-medium truncate max-w-[200px]">{product.name}</span>
+          <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-text-secondary/40" />
+          <Link href={`/categorias/${product.category.slug}`} className="text-text-secondary hover:text-accent transition-colors truncate max-w-[100px] sm:max-w-none">{product.category.name}</Link>
+          <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-text-secondary/40" />
+          <span className="text-white font-medium truncate max-w-[120px] sm:max-w-[200px]">{product.name}</span>
         </nav>
 
-        <div className="bg-card/30 backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden shadow-2xl shadow-black/20 fade-up" style={{ animationDelay: '100ms' }}>
+        <div className="bg-card/30 backdrop-blur-xl border border-white/[0.06] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl shadow-black/20 fade-up" style={{ animationDelay: '100ms' }}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
             {/* Image Gallery Area */}
-            <div className="relative min-w-0 bg-secondary/20 p-4 sm:p-6 flex items-center justify-center border-b lg:border-b-0 lg:border-r border-white/[0.06]">
+            <div className="relative min-w-0 bg-secondary/20 p-0 sm:p-4 md:p-6 flex items-center justify-center border-b lg:border-b-0 lg:border-r border-white/[0.06]">
               {/* Category badge */}
-              <div className="absolute top-5 left-5 z-10 flex items-center gap-2">
-                <span className="px-3 py-1.5 rounded-full bg-accent/15 border border-accent/25 text-accent font-bold text-[11px] uppercase tracking-wider backdrop-blur-sm">
+              <div className="absolute top-3 left-3 sm:top-5 sm:left-5 z-10 flex items-center gap-1.5 sm:gap-2">
+                <span className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-full bg-accent/15 border border-accent/25 text-accent font-bold text-[10px] sm:text-[11px] uppercase tracking-wider backdrop-blur-sm">
                   {product.category.name}
                 </span>
                 {hasDiscount && (
@@ -139,19 +139,19 @@ export default async function ProductoPage({ params }: { params: { slug: string 
             </div>
 
             {/* Product Info Area */}
-            <div className="p-5 sm:p-8 lg:p-10 flex flex-col">
+            <div className="p-4 sm:p-6 lg:p-10 flex flex-col">
               {/* Brand */}
               {product.brand && (
                 <span className="mb-2 text-xs font-bold uppercase tracking-wider text-accent">{product.brand}</span>
               )}
               
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-5 tracking-tight leading-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-3 sm:mb-5 tracking-tight leading-tight">
                 {product.name}
               </h1>
               
               {/* Price block */}
-              <div className="flex flex-wrap items-end gap-3 sm:gap-4 mb-6 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                <span className="text-3xl sm:text-4xl font-black text-gradient-accent">{price}</span>
+              <div className="flex flex-wrap items-end gap-2.5 sm:gap-4 mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <span className="text-2xl sm:text-3xl md:text-4xl font-black text-gradient-accent">{price}</span>
                 {product.compareAtPrice && (
                   <div className="flex flex-col">
                     <span className="text-base text-text-secondary line-through font-medium">
@@ -165,16 +165,16 @@ export default async function ProductoPage({ params }: { params: { slug: string 
               </div>
 
               {/* Description */}
-              <div className="mb-7">
-                <p className="text-sm sm:text-base text-text-secondary leading-relaxed whitespace-pre-line">
+              <div className="mb-5 sm:mb-7">
+                <p className="text-[13px] sm:text-sm md:text-base text-text-secondary leading-relaxed whitespace-pre-line">
                   {product.description || product.shortDescription || 'Sin descripción disponible.'}
                 </p>
               </div>
 
               {/* Attributes */}
               {attributeGroups.length > 0 && (
-                <div className="mb-7 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                  <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.16em] text-accent">Características</h2>
+                <div className="mb-5 sm:mb-7 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 sm:p-4">
+                  <h2 className="mb-3 sm:mb-4 text-xs font-bold uppercase tracking-[0.16em] text-accent">Características</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {attributeGroups.map((item) => {
                       const Icon = item.icon;
@@ -193,18 +193,18 @@ export default async function ProductoPage({ params }: { params: { slug: string 
               )}
 
               {/* Trust badges */}
-              <div className="grid grid-cols-2 gap-2.5 mb-7">
-                <div className="flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04] transition-colors duration-300 hover:bg-white/[0.04]">
-                  <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/15">
-                    <Truck className="w-4 h-4 text-purple-400" />
+              <div className="grid grid-cols-2 gap-2 sm:gap-2.5 mb-5 sm:mb-7">
+                <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04] transition-colors duration-300 hover:bg-white/[0.04]">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-purple-500/10 border border-purple-500/15">
+                    <Truck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400" />
                   </div>
-                  <p className="text-xs font-bold text-white">Envío a todo el país</p>
+                  <p className="text-[11px] sm:text-xs font-bold text-white">Envío a todo el país</p>
                 </div>
-                <div className="flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04] transition-colors duration-300 hover:bg-white/[0.04]">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/15">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04] transition-colors duration-300 hover:bg-white/[0.04]">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/15">
+                    <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
                   </div>
-                  <p className="text-xs font-bold text-white">Compra Segura</p>
+                  <p className="text-[11px] sm:text-xs font-bold text-white">Compra Segura</p>
                 </div>
               </div>
 
@@ -212,15 +212,22 @@ export default async function ProductoPage({ params }: { params: { slug: string 
               <div className="mt-auto pt-6 border-t border-white/[0.06]">
                 <div className="flex items-center justify-between mb-5">
                   <span className="text-sm text-text-secondary">Disponibilidad:</span>
-                  {product.stock > 0 ? (
-                    <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-bold border border-emerald-500/20">
-                      En Stock ({product.stock})
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1.5 bg-red-500/10 text-red-400 rounded-full text-xs font-bold border border-red-500/20">
-                      Agotado
-                    </span>
-                  )}
+                  <div className="flex flex-col items-end gap-1.5">
+                    {product.stock > 0 ? (
+                      <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-bold border border-emerald-500/20">
+                        En Stock ({product.stock})
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1.5 bg-red-500/10 text-red-400 rounded-full text-xs font-bold border border-red-500/20">
+                        Agotado
+                      </span>
+                    )}
+                    {product.deliveryMode === 'POR_PEDIDO' && (
+                      <span className="px-3 py-1.5 bg-amber-500/10 text-amber-400 rounded-full text-xs font-bold border border-amber-500/20">
+                        ⚠️ Por pedido
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {config?.whatsappNumber ? (

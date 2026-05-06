@@ -13,6 +13,7 @@ model SiteConfig {
   siteSlogan            String?
   logoUrl               String?
   faviconUrl            String?
+  appIconUrl            String?
   primaryColor          String   @default("#0d0d0d")
   secondaryColor        String   @default("#C8952A")
   whatsappNumber        String?
@@ -83,6 +84,7 @@ model Product {
   specs                   String?
   price                   Float
   compareAtPrice          Float?
+  deliveryMode            String?        @default("INMEDIATA")
   status                  String         @default("PUBLISHED")
   categoryId              String
   category                Category       @relation(fields: [categoryId], references: [id])

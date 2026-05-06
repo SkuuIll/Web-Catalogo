@@ -32,12 +32,12 @@ export function ProductCard({ product, config }: { product: any, config: any }) 
     <div className="group catalog-surface relative border border-white/[0.04] rounded-xl overflow-hidden hover:border-accent/30 transition-all duration-400 flex flex-col h-full hover:-translate-y-1.5 hover:shadow-[0_24px_60px_rgba(0,0,0,0.35)] shine-card">
       <Link href={`/producto/${product.slug}`} className="flex-1 flex flex-col">
         {/* Image */}
-        <div className="relative aspect-[4/5] sm:aspect-square w-full bg-secondary/40 overflow-hidden">
+        <div className="relative aspect-square w-full bg-secondary/40 overflow-hidden">
            <Image
              src={imageUrl}
              alt={product.name}
              fill
-             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08]"
+             className="object-contain p-2 transition-transform duration-700 ease-out group-hover:scale-[1.08]"
              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
            />
            {/* Overlay gradients */}
@@ -67,9 +67,16 @@ export function ProductCard({ product, config }: { product: any, config: any }) 
 
            {/* Stock badge */}
            <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between gap-2">
-             <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold backdrop-blur-sm ${product.stock > 0 ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20' : 'bg-red-500/15 text-red-300 border border-red-500/20'}`}>
-               {product.stock > 0 ? 'En stock' : 'Agotado'}
-             </span>
+             <div className="flex gap-1.5 flex-wrap">
+               <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold backdrop-blur-sm ${product.stock > 0 ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20' : 'bg-red-500/15 text-red-300 border border-red-500/20'}`}>
+                 {product.stock > 0 ? 'En stock' : 'Agotado'}
+               </span>
+               {product.deliveryMode === 'POR_PEDIDO' && (
+                 <span className="rounded-lg px-2 py-0.5 text-[10px] font-bold backdrop-blur-sm bg-amber-500/15 text-amber-300 border border-amber-500/20">
+                   Por pedido
+                 </span>
+               )}
+             </div>
            </div>
         </div>
 

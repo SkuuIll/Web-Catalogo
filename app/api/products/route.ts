@@ -113,6 +113,7 @@ export async function POST(request: Request) {
         specs: data.specs || null,
         price: data.price,
         compareAtPrice: data.compareAtPrice || null,
+        deliveryMode: data.deliveryMode || 'INMEDIATA',
         status: data.status || (data.active === false ? 'PAUSED' : 'PUBLISHED'),
         categoryId: data.categoryId,
         featured: data.featured || false,

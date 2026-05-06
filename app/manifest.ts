@@ -1,15 +1,19 @@
 import type { MetadataRoute } from 'next'
+import { prisma } from '@/lib/prisma'
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const config = await prisma.siteConfig.findFirst().catch(() => null);
+  const iconUrl = config?.appIconUrl || config?.faviconUrl || config?.logoUrl || '/icon-192.png';
+
   return {
-    name: 'SHOWROOM JR — Catálogo Premium',
-    short_name: 'SHOWROOM JR',
-    description: 'Catálogo de productos con consultas rápidas por WhatsApp. Encontrá lo que buscás de forma simple.',
+    name: config?.siteName ? `${config.siteName} — Catálogo Premium` : 'SHOWROOM JR — Catálogo Premium',
+    short_name: config?.siteName || 'SHOWROOM JR',
+    description: config?.metaDescription || 'Catálogo de productos con consultas rápidas por WhatsApp. Encontrá lo que buscás de forma simple.',
     start_url: '/?source=pwa',
     scope: '/',
     display: 'standalone',
-    background_color: '#0a0a0a',
-    theme_color: '#0a0a0a',
+    background_color: config?.primaryColor || '#0a0a0a',
+    theme_color: config?.primaryColor || '#0a0a0a',
     orientation: 'portrait-primary',
     categories: ['shopping', 'lifestyle'],
     lang: 'es-AR',
@@ -17,25 +21,25 @@ export default function manifest(): MetadataRoute.Manifest {
     prefer_related_applications: false,
     icons: [
       {
-        src: '/icon-192.png',
+        src: iconUrl,
         sizes: '192x192',
         type: 'image/png',
         purpose: 'maskable',
       },
       {
-        src: '/icon-512.png',
+        src: iconUrl,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',
       },
       {
-        src: '/icon-192.png',
+        src: iconUrl,
         sizes: '192x192',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/icon-512.png',
+        src: iconUrl,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',

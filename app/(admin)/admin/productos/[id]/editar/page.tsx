@@ -24,9 +24,23 @@ export default function EditProductPage() {
   const [formData, setFormData] = useState({
     name: '', slug: '', description: '', shortDescription: '',
     brand: '', model: '', sizes: '', colors: '', specs: '',
-    price: '', compareAtPrice: '', status: 'PUBLISHED', categoryId: '', stock: '0',
+    price: '', compareAtPrice: '', status: 'PUBLISHED', deliveryMode: 'INMEDIATA', categoryId: '', stock: '0',
     active: true, featured: false, whatsappMessageOverride: '', metaTitle: '', metaDescription: '', metaKeywords: '', ogImageUrl: ''
   })
+
+  const addSize = (size: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: prev.sizes ? (prev.sizes.includes(size) ? prev.sizes : `${prev.sizes}, ${size}`) : size
+    }))
+  }
+  
+  const addColor = (color: string) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: prev.colors ? (prev.colors.includes(color) ? prev.colors : `${prev.colors}, ${color}`) : color
+    }))
+  }
 
   useEffect(() => {
     Promise.all([
@@ -47,6 +61,7 @@ export default function EditProductPage() {
         price: String(product.price || ''),
         compareAtPrice: product.compareAtPrice ? String(product.compareAtPrice) : '',
         status: product.status || 'PUBLISHED',
+        deliveryMode: product.deliveryMode || 'INMEDIATA',
         categoryId: product.categoryId || '',
         stock: String(product.stock || 0),
         active: product.active ?? true,
@@ -251,6 +266,13 @@ export default function EditProductPage() {
                 <input type="number" required name="stock" value={formData.stock} onChange={handleChange} className="w-full bg-secondary border border-border rounded-lg px-4 py-2.5 focus:border-accent outline-none transition-colors" />
               </div>
               <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Modo de entrega</label>
+                <select name="deliveryMode" value={formData.deliveryMode} onChange={handleChange} className="w-full bg-secondary border border-border rounded-lg px-4 py-2.5 focus:border-accent outline-none transition-colors">
+                  <option value="INMEDIATA">Entrega inmediata</option>
+                  <option value="POR_PEDIDO">Por pedido</option>
+                </select>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-text-secondary mb-1">Estado</label>
                 <select name="status" value={formData.status} onChange={handleChange} className="w-full bg-secondary border border-border rounded-lg px-4 py-2.5 focus:border-accent outline-none transition-colors">
                   <option value="DRAFT">Borrador</option>
@@ -275,11 +297,21 @@ export default function EditProductPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-text-secondary mb-1">Talles / variantes</label>
-                  <input type="text" name="sizes" value={formData.sizes} onChange={handleChange} className="w-full bg-secondary border border-border rounded-lg px-4 py-2.5 focus:border-accent outline-none transition-colors" placeholder="S, M, L / 38, 39, 40 / 1L" />
+                  <input type="text" name="sizes" value={formData.sizes} onChange={handleChange} className="w-full bg-secondary border border-border rounded-lg px-4 py-2.5 focus:border-accent outline-none transition-colors mb-2" placeholder="S, M, L / 38, 39, 40 / 1L" />
+                  <div className="flex flex-wrap gap-1">
+                    {['S', 'M', 'L', 'XL', 'XXL', '38', '39', '40', '41', '42', '43'].map(s => (
+                      <button type="button" key={s} onClick={() => addSize(s)} className="text-xs bg-accent/10 hover:bg-accent/20 text-accent px-2 py-1 rounded transition-colors">{s}</button>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-text-secondary mb-1">Colores</label>
-                  <input type="text" name="colors" value={formData.colors} onChange={handleChange} className="w-full bg-secondary border border-border rounded-lg px-4 py-2.5 focus:border-accent outline-none transition-colors" placeholder="Negro, blanco, azul..." />
+                  <input type="text" name="colors" value={formData.colors} onChange={handleChange} className="w-full bg-secondary border border-border rounded-lg px-4 py-2.5 focus:border-accent outline-none transition-colors mb-2" placeholder="Negro, blanco, azul..." />
+                  <div className="flex flex-wrap gap-1">
+                    {['Negro', 'Blanco', 'Gris', 'Azul', 'Rojo', 'Verde', 'Beige'].map(c => (
+                      <button type="button" key={c} onClick={() => addColor(c)} className="text-xs bg-accent/10 hover:bg-accent/20 text-accent px-2 py-1 rounded transition-colors">{c}</button>
+                    ))}
+                  </div>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-text-secondary mb-1">Detalles técnicos, medidas o material</label>

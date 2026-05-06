@@ -201,7 +201,8 @@ export default function ConfigPage() {
               <Field label="Nombre del Sitio" name="siteName" placeholder="SHOWROOM JR" />
               <Field label="Slogan" name="siteSlogan" placeholder="Tu tienda premium" />
               <ImageUploadField label="URL del Logo" name="logoUrl" placeholder="https://..." />
-              <ImageUploadField label="URL del Favicon" name="faviconUrl" placeholder="https://..." />
+              <ImageUploadField label="URL del Favicon / Ícono de Pestañas" name="faviconUrl" placeholder="https://..." />
+              <ImageUploadField label="URL del Ícono de la App (PWA)" name="appIconUrl" placeholder="https://..." />
             </div>
             <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-4">
               <Field label="Modo Mantenimiento" name="maintenanceMode" type="checkbox" placeholder="Mostrar pantalla de mantenimiento en la tienda pública" />

@@ -50,6 +50,7 @@ export async function PUT(
     if (data.specs !== undefined) updateData.specs = data.specs || null;
     if (data.price !== undefined) updateData.price = data.price;
     if (data.compareAtPrice !== undefined) updateData.compareAtPrice = data.compareAtPrice || null;
+    if (data.deliveryMode !== undefined) updateData.deliveryMode = data.deliveryMode || null;
     if (data.status !== undefined) updateData.status = data.status;
     if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
     if (data.featured !== undefined) updateData.featured = data.featured;
