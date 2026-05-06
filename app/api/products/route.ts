@@ -116,6 +116,20 @@ export async function POST(request: Request) {
     const data = parsed.data;
     const slug = data.slug ? slugify(data.slug) : slugify(data.name);
 
+    const files = formData.getAll('images') as File[];
+    const urls = formData.getAll('imageUrls') as string[];
+
+    // Pre-validate all files before creating the product
+    for (const file of files) {
+      if (!(file instanceof Blob)) {
+         return NextResponse.json({ error: 'Archivo inválido enviado' }, { status: 400 });
+      }
+      const validationError = validateImageFile(file);
+      if (validationError) {
+        return NextResponse.json({ error: `Imagen ${file.name || 'desconocida'}: ${validationError}` }, { status: 400 });
+      }
+    }
+
     const product = await prisma.product.create({
       data: {
         name: data.name,
@@ -143,9 +157,6 @@ export async function POST(request: Request) {
       },
     });
 
-    const files = formData.getAll('images') as File[];
-    const urls = formData.getAll('imageUrls') as string[];
-    
     let sortOrder = 0;
     
     for (const url of urls) {
