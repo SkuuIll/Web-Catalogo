@@ -4,6 +4,8 @@ import Image from 'next/image'
 import { Upload, Link2, Trash2, ImageIcon } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 export default function AdminImagesPage() {
   const [images, setImages] = useState<any[]>([])
@@ -51,7 +53,15 @@ export default function AdminImagesPage() {
     }
   }
 
-  if (loading) return <div className="p-10 text-center text-sm text-text-secondary">Cargando imágenes...</div>
+  if (loading) return (
+    <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <Skeleton key={i} className="aspect-square rounded-xl" />
+        ))}
+      </div>
+    </div>
+  )
 
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full">
@@ -61,11 +71,10 @@ export default function AdminImagesPage() {
       </div>
 
       {images.length === 0 ? (
-        <div className="text-center py-16 md:py-20 bg-card/60 border border-white/[0.06] rounded-xl px-4">
-          <ImageIcon className="w-16 h-16 mx-auto text-text-secondary/30 mb-4" />
-          <p className="text-text-secondary text-lg">No hay imágenes cargadas.</p>
-          <p className="text-text-secondary text-sm mt-2">Subí imágenes desde la página de edición de cada producto.</p>
-        </div>
+        <EmptyState
+          variant="images"
+          description="Subí imágenes desde la página de edición de cada producto."
+        />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
           {images.map((img) => (

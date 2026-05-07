@@ -1,10 +1,15 @@
 'use client'
 import React from 'react'
 import { MessageCircle } from 'lucide-react'
+import { useToast } from '@/components/ui/Toast'
 
 export function WhatsAppButton({ number, message }: { number?: string | null, message?: string | null }) {
+  const { info } = useToast()
+
   if (!number) return null;
+
   const handleWA = () => {
+    info('Abriendo WhatsApp...')
     fetch('/api/analytics/whatsapp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

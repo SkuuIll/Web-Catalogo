@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { formatPriceARS } from '@/lib/price-formatter'
 import { Check, X, TrendingUp, TrendingDown, Loader2 } from 'lucide-react'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { SkeletonTable } from '@/components/ui/Skeleton'
 
 export default function AdminPricesPage() {
   const [products, setProducts] = useState<any[]>([])
@@ -104,7 +106,7 @@ export default function AdminPricesPage() {
     }
   }
 
-  if (loading) return <div className="p-10 text-center text-text-secondary">Cargando precios...</div>
+  if (loading) return <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full"><SkeletonTable rows={8} cols={5} /></div>
 
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full">
@@ -266,7 +268,7 @@ export default function AdminPricesPage() {
             </tbody>
           </table>
           {products.length === 0 && (
-            <div className="text-center py-12 text-text-secondary">No hay productos.</div>
+            <EmptyState variant="products" className="bg-card/60 border border-white/[0.06] rounded-xl" />
           )}
         </div>
       </div>

@@ -2,26 +2,30 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import {
   LayoutDashboard, Package, Tag, DollarSign,
   ImageIcon, Megaphone, Settings, LogOut,
   UploadCloud, Zap
 } from 'lucide-react'
 
-const navItems = [
+const allNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/productos', label: 'Productos', icon: Package },
   { href: '/admin/categorias', label: 'Categorías', icon: Tag },
   { href: '/admin/precios', label: 'Precios', icon: DollarSign },
   { href: '/admin/imagenes', label: 'Imágenes', icon: ImageIcon },
   { href: '/admin/banners', label: 'Banners', icon: Megaphone },
-  { href: '/admin/importar-exportar', label: 'Importar', icon: UploadCloud },
-  { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
+  { href: '/admin/importar-exportar', label: 'Importar', icon: UploadCloud, adminOnly: true },
+  { href: '/admin/configuracion', label: 'Configuración', icon: Settings, adminOnly: true },
 ]
 
 export function AdminSidebar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
+  const role = (session?.user as any)?.role
+  const isSuperAdmin = role === 'SUPER_ADMIN'
+  const navItems = allNavItems.filter(item => !item.adminOnly || isSuperAdmin)
   return (
     <>
       {/* Desktop sidebar */}

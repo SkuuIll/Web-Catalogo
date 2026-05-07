@@ -5,6 +5,8 @@ import { formatPriceARS } from '@/lib/price-formatter'
 import { Plus, Search, Edit2, Trash2, Eye, EyeOff, Star, AlertTriangle, Copy, ChevronLeft, ChevronRight, Filter } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { SkeletonTable, SkeletonCard } from '@/components/ui/Skeleton'
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([])
@@ -18,6 +20,8 @@ export default function AdminProductsPage() {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkLoading, setBulkLoading] = useState(false)
   const { success, error: toastError } = useToast()
   const confirm = useConfirm()
   const PAGE_SIZE = 15
@@ -103,9 +107,66 @@ export default function AdminProductsPage() {
     }
   }
 
+  const handleBulkAction = async (action: 'publish' | 'pause' | 'delete') => {
+    if (selectedIds.size === 0) return
+    if (action === 'delete') {
+      const ok = await confirm({
+        title: 'Eliminar productos',
+        message: `¿Eliminar ${selectedIds.size} producto(s) permanentemente?`,
+        confirmLabel: 'Eliminar',
+        tone: 'danger',
+      })
+      if (!ok) return
+    }
+    setBulkLoading(true)
+    try {
+      const res = await fetch('/api/products/bulk-actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(selectedIds), action }),
+      })
+      if (res.ok) {
+        success(`Acción aplicada a ${selectedIds.size} producto(s).`)
+        setSelectedIds(new Set())
+        loadProducts()
+      } else {
+        const data = await res.json()
+        toastError(data.error || 'Error al procesar.')
+      }
+    } catch { toastError('Error al procesar.') }
+    finally { setBulkLoading(false) }
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === products.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(products.map(p => p.id)))
+    }
+  }
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
-  if (loading) return <div className="p-10 text-center text-text-secondary"><div className="inline-flex items-center gap-2"><div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />Cargando productos...</div></div>
+  if (loading) return (
+    <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full space-y-4">
+      <div className="hidden md:block">
+        <SkeletonTable rows={8} cols={5} />
+      </div>
+      <div className="md:hidden grid grid-cols-1 gap-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+    </div>
+  )
 
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full">
@@ -222,11 +283,43 @@ export default function AdminProductsPage() {
         ))}
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-20 md:bottom-6 left-4 right-4 z-50 mx-auto max-w-md glass-strong border border-accent/30 rounded-xl p-3 flex items-center justify-between gap-3 shadow-2xl">
+          <span className="text-sm font-bold text-white">{selectedIds.size} seleccionado(s)</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleBulkAction('publish')}
+              disabled={bulkLoading}
+              className="px-3 py-1.5 text-xs font-bold rounded-lg bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-smooth disabled:opacity-50"
+            >
+              Publicar
+            </button>
+            <button
+              onClick={() => handleBulkAction('pause')}
+              disabled={bulkLoading}
+              className="px-3 py-1.5 text-xs font-bold rounded-lg bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/30 transition-smooth disabled:opacity-50"
+            >
+              Pausar
+            </button>
+            <button
+              onClick={() => handleBulkAction('delete')}
+              disabled={bulkLoading}
+              className="px-3 py-1.5 text-xs font-bold rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-smooth disabled:opacity-50"
+            >
+              {bulkLoading ? '...' : 'Eliminar'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="hidden md:block bg-card/60 border border-white/[0.06] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-white/[0.02] text-text-secondary text-xs uppercase tracking-wider border-b border-white/[0.06]">
+                <th className="p-4 font-medium w-10">
+                  <input type="checkbox" checked={selectedIds.size === products.length && products.length > 0} onChange={toggleSelectAll} className="w-4 h-4 rounded cursor-pointer" />
+                </th>
                 <th className="p-4 font-medium">Nombre</th>
                 <th className="p-4 font-medium">Categoría</th>
                 <th className="p-4 font-medium">Precio</th>
@@ -238,12 +331,20 @@ export default function AdminProductsPage() {
             <tbody className="divide-y divide-border">
               {products.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-text-secondary">
-                    {search ? 'Sin resultados para tu búsqueda.' : 'No hay productos registrados.'}
+                  <td colSpan={7} className="p-0">
+                    <EmptyState
+                      variant={search ? 'search' : 'products'}
+                      title={search ? 'Sin resultados' : 'No hay productos'}
+                      description={search ? 'Probá con otros filtros.' : 'Comenzá agregando tu primer producto.'}
+                      className="py-8"
+                    />
                   </td>
                 </tr>
               ) : products.map((product) => (
                 <tr key={product.id} className="hover:bg-secondary/40 transition-colors">
+                  <td className="p-4">
+                    <input type="checkbox" checked={selectedIds.has(product.id)} onChange={() => toggleSelect(product.id)} className="w-4 h-4 rounded cursor-pointer" />
+                  </td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-white">{product.name}</span>

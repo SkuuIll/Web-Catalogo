@@ -32,8 +32,8 @@ export function HeroSection({ title, subtitle, imageUrl, logoUrl, productCount =
           </>
         )}
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/50 to-transparent pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-r from-bg-primary/30 via-transparent to-bg-primary/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-bg-primary/20 via-transparent to-bg-primary/20 pointer-events-none" />
       </div>
 
       {/* Profile Section */}

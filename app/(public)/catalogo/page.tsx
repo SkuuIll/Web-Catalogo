@@ -3,19 +3,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import { ProductCard } from '@/components/shop/ProductCard'
 import { FeaturedProductCard } from '@/components/shop/FeaturedProductCard'
 import { Search, SlidersHorizontal, X, ChevronDown, Sparkles, PackageCheck, Loader2 } from 'lucide-react'
-
-function SkeletonCard() {
-  return (
-    <div className="bg-card/30 border border-white/[0.04] rounded-xl overflow-hidden">
-      <div className="aspect-square bg-secondary/30 shimmer" />
-      <div className="p-4 space-y-2.5">
-        <div className="h-2.5 bg-white/[0.04] rounded-full w-1/3 shimmer" />
-        <div className="h-3.5 bg-white/[0.04] rounded-full w-4/5 shimmer" />
-        <div className="h-3 bg-white/[0.04] rounded-full w-2/5 shimmer" />
-      </div>
-    </div>
-  )
-}
+import { EmptyState } from '@/components/ui/EmptyState'
+import { SkeletonCard } from '@/components/ui/Skeleton'
 
 export default function CatalogoPage() {
   const [config, setConfig] = useState<any>(null)
@@ -303,12 +292,10 @@ export default function CatalogoPage() {
             ))}
           </div>
         ) : (featured ? 1 : 0) + rest.length === 0 ? (
-          <div className="text-center py-20 bg-card/30 backdrop-blur-md rounded-xl border border-white/[0.06]">
-            <Search className="w-12 h-12 mx-auto text-text-secondary/20 mb-4" />
-            <p className="text-xl text-text-secondary font-bold">Sin resultados para tu búsqueda.</p>
-            <p className="text-sm text-text-secondary mt-2">Probá con otros filtros o palabras clave.</p>
-            <button onClick={clearFilters} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-black hover:bg-accent-hover transition-colors">Ver todos los productos</button>
-          </div>
+          <EmptyState
+            variant="search"
+            action={{ label: 'Ver todos los productos', onClick: clearFilters }}
+          />
         ) : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">

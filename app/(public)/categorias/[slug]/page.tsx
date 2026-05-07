@@ -2,8 +2,9 @@ import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, PackageSearch, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { ProductCard } from '@/components/shop/ProductCard';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export const revalidate = 60;
 
@@ -51,13 +52,13 @@ export default async function CategoriaSlugPage({ params }: { params: { slug: st
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 text-text-secondary bg-card/30 backdrop-blur-md rounded-xl border border-white/[0.06] px-4">
-            <PackageSearch className="mx-auto mb-4 h-12 w-12 text-text-secondary/20" />
-            <p className="text-xl font-bold">No hay productos en esta categoría.</p>
-            <p className="text-sm mt-2">Probá explorar otras categorías o el catálogo completo.</p>
-            <Link href="/catalogo" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-black hover:bg-accent-hover transition-colors">
-              Ver catálogo completo
-            </Link>
+          <div className="bg-card/30 backdrop-blur-md rounded-xl border border-white/[0.06]">
+            <EmptyState
+              variant="products"
+              title="No hay productos en esta categoría."
+              description="Probá explorar otras categorías o el catálogo completo."
+              action={{ label: 'Ver catálogo completo', href: '/catalogo' }}
+            />
           </div>
         )}
       </div>

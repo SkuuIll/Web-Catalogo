@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import NextImage from 'next/image'
 import { useToast } from '@/components/ui/Toast'
+import { SkeletonForm } from '@/components/ui/Skeleton'
 import {
   BadgeCheck,
   Bot,
@@ -60,7 +61,7 @@ export default function ConfigPage() {
     finally { setSaving(false) }
   }
 
-  if (loading) return <div className="p-10 text-center text-sm text-text-secondary">Cargando configuración...</div>
+  if (loading) return <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full"><SkeletonForm fields={8} /></div>
 
   const activeTabMeta = tabs.find(tab => tab.id === activeTab) || tabs[0]
   const ActiveIcon = activeTabMeta.icon
@@ -139,7 +140,7 @@ export default function ConfigPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-10 max-w-6xl mx-auto w-full">
+    <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full">
       <div className="sticky top-0 md:top-0 z-20 -mx-4 mb-6 border-b border-border bg-bg-primary/90 px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6 md:-mx-10 md:px-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
         <div className="min-w-0">

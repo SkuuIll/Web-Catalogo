@@ -2,6 +2,7 @@ import React from 'react';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { AlertTriangle, ImageOff, Package, Tag, Eye, Plus, DollarSign, Settings, Image as ImageIcon, Megaphone, MessageCircle, ArrowRight, TrendingUp, Zap } from 'lucide-react';
+import { DashboardCharts } from '@/components/admin/DashboardCharts';
 
 export default async function AdminDashboardPage() {
   let productCount = 0, categoryCount = 0, viewsAgg: any = { _sum: { viewCount: 0 } };
@@ -186,6 +187,10 @@ export default async function AdminDashboardPage() {
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="mt-5">
+        <DashboardCharts />
       </div>
     </div>
   );

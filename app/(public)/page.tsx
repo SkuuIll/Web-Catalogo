@@ -7,6 +7,7 @@ import { FeaturedProductCard } from '@/components/shop/FeaturedProductCard';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Grid2x2, Sparkles, Zap } from 'lucide-react';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export const revalidate = 60;
 
@@ -114,8 +115,8 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 text-text-secondary bg-card/30 backdrop-blur-md rounded-xl border border-white/[0.06]">
-            <p className="text-xl">Aún no hay productos disponibles.</p>
+          <div className="bg-card/30 backdrop-blur-md rounded-xl border border-white/[0.06]">
+            <EmptyState variant="products" />
           </div>
         )}
       </section>

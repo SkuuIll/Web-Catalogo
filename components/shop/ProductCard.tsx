@@ -39,6 +39,7 @@ export function ProductCard({ product, config }: { product: any, config: any }) 
              fill
              className="object-contain p-2 transition-transform duration-700 ease-out group-hover:scale-[1.08]"
              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+             loading="lazy"
            />
            {/* Overlay gradients */}
            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />

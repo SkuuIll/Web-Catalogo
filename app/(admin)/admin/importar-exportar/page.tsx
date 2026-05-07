@@ -29,7 +29,7 @@ export default function ImportExportPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-10 max-w-4xl mx-auto w-full">
+    <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full">
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gradient mb-1">Importar / Exportar</h1>
         <p className="text-sm text-text-secondary">Gestioná productos en lote con archivos CSV.</p>
@@ -48,6 +48,15 @@ export default function ImportExportPage() {
           <span className="mt-5 inline-flex rounded-lg border border-accent/30 px-4 py-2 text-sm font-bold text-accent">Seleccionar CSV</span>
           <input type="file" accept=".csv,text/csv" onChange={handleImport} className="hidden" disabled={loading} />
         </label>
+      </div>
+      <div className="mt-4 text-center">
+        <a
+          href={`data:text/csv;charset=utf-8,name,category,price,compareAtPrice,stock,brand,model,sizes,colors,description%0ACamiseta%20Blanca,Ropa,25000,32000,50,Marca%20X,MT-100,"S,M,L","Blanco,Negro",Camiseta%20de%20algodón%20100%`}
+          download="plantilla-productos.csv"
+          className="text-xs text-accent hover:text-accent-hover underline"
+        >
+          Descargar plantilla CSV de ejemplo
+        </a>
       </div>
     </div>
   )

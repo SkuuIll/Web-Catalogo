@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { MessageCircle } from 'lucide-react'
+import { useToast } from '@/components/ui/Toast'
 
 export function WhatsAppTrackedLink({
   href,
@@ -10,7 +11,10 @@ export function WhatsAppTrackedLink({
   href: string
   productId: string
 }) {
+  const { info } = useToast()
+
   const track = () => {
+    info('Abriendo WhatsApp...')
     fetch('/api/analytics/whatsapp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

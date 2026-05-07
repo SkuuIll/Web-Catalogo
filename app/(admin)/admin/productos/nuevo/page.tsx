@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Eye, MessageCircle, Sparkles, Loader2, Upload, Link2, Trash2 } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
+import { useUnsavedChanges } from '@/lib/useUnsavedChanges'
 
 export default function NewProductPage() {
   const router = useRouter()
@@ -17,6 +18,8 @@ export default function NewProductPage() {
   const [formData, setFormData] = useState({
     name: '', slug: '', description: '', shortDescription: '', brand: '', model: '', sizes: '', colors: '', specs: '', price: '', compareAtPrice: '', status: 'PUBLISHED', deliveryMode: 'INMEDIATA', categoryId: '', stock: '0', active: true, featured: false, whatsappMessageOverride: '', metaTitle: '', metaDescription: '', metaKeywords: '', ogImageUrl: ''
   })
+
+  useUnsavedChanges(formData.name.length > 0 || formData.description.length > 0)
   
   const addSize = (size: string) => {
     setFormData(prev => ({

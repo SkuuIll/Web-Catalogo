@@ -1,8 +1,8 @@
 'use client'
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react'
-import { CheckCircle, XCircle, AlertCircle, X } from 'lucide-react'
+import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react'
 
-type ToastType = 'success' | 'error' | 'warning'
+type ToastType = 'success' | 'error' | 'warning' | 'info'
 
 interface Toast {
   id: string
@@ -15,6 +15,7 @@ interface ToastContextValue {
   success: (message: string) => void
   error: (message: string) => void
   warning: (message: string) => void
+  info: (message: string) => void
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
@@ -37,6 +38,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     success: (msg) => add(msg, 'success'),
     error: (msg) => add(msg, 'error'),
     warning: (msg) => add(msg, 'warning'),
+    info: (msg) => add(msg, 'info'),
   }
 
   return (
@@ -57,16 +59,18 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
     success: <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />,
     error: <XCircle className="w-5 h-5 text-red-400 flex-shrink-0" />,
     warning: <AlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0" />,
+    info: <Info className="w-5 h-5 text-blue-400 flex-shrink-0" />,
   }
   const borders = {
     success: 'border-green-500/30',
     error: 'border-red-500/30',
     warning: 'border-yellow-500/30',
+    info: 'border-blue-500/30',
   }
 
   return (
     <div
-      className={`pointer-events-auto flex items-center gap-3 bg-card border ${borders[toast.type]} rounded-lg px-4 py-3 shadow-2xl shadow-black/50 w-full sm:min-w-[260px] sm:max-w-sm animate-in slide-in-from-right-2 duration-200`}
+      className={`pointer-events-auto flex items-center gap-3 bg-card border ${borders[toast.type]} rounded-lg px-4 py-3 shadow-2xl shadow-black/50 w-full sm:min-w-[260px] sm:max-w-sm toast-enter`}
     >
       {icons[toast.type]}
       <p className="text-sm text-white font-medium flex-1">{toast.message}</p>

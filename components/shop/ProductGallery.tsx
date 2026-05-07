@@ -118,7 +118,7 @@ export function ProductGallery({ images, productName }: { images: GalleryImage[]
                 }`}
               >
                 {image.url ? (
-                  <Image src={image.url} alt={image.altText || productName} fill className="object-cover" sizes="64px" />
+                  <Image src={image.url} alt={image.altText || productName} fill className="object-cover" sizes="64px" loading="lazy" />
                 ) : (
                   <ImageIcon className="m-auto h-5 w-5 text-text-secondary" />
                 )}

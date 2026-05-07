@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { formatPriceARS } from '@/lib/price-formatter';
 import { ArrowLeft, ExternalLink, ListFilter } from 'lucide-react';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export const revalidate = 60;
 
@@ -134,7 +135,7 @@ export default async function TablaProductosPage() {
           ))}
           {totalProducts === 0 && (
             <div className="rounded-lg border border-white/10 bg-card/40 py-20 text-center">
-              <p className="text-text-secondary text-lg">No hay productos disponibles.</p>
+              <EmptyState variant="products" className="bg-transparent" />
             </div>
           )}
         </div>

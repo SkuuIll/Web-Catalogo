@@ -33,29 +33,34 @@ export function PWAInstallPrompt() {
 
     const dismissed = window.localStorage.getItem('pwa-install-dismissed') === 'true'
     
-    // For Android/Chrome
-    const handleBeforeInstall = (event: Event) => {
-      event.preventDefault()
-      setInstallEvent(event as BeforeInstallPromptEvent)
-      // Solo mostrar en móviles, si no está standalone y si no se descartó antes
+    const showPrompt = () => {
       if (!dismissed && !_isStandalone && _isMobile) {
         setVisible(true)
         window.localStorage.setItem('pwa-install-dismissed', 'true')
       }
     }
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall)
-
-    // For iOS, show custom prompt if not dismissed and not already installed
-    if (_isIOS && !dismissed && !_isStandalone && _isMobile) {
-      // Delay to not be too aggressive
-      setTimeout(() => {
-        setVisible(true)
-        window.localStorage.setItem('pwa-install-dismissed', 'true')
-      }, 3000)
+    // For Android/Chrome — show after 30s delay
+    let timeout: ReturnType<typeof setTimeout>
+    const handleBeforeInstall = (event: Event) => {
+      event.preventDefault()
+      setInstallEvent(event as BeforeInstallPromptEvent)
+      timeout = setTimeout(showPrompt, 30000)
     }
 
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall)
+
+    // For iOS, show custom prompt after 30s if not dismissed and not already installed
+    let iosTimeout: ReturnType<typeof setTimeout>
+    if (_isIOS && !dismissed && !_isStandalone && _isMobile) {
+      iosTimeout = setTimeout(showPrompt, 30000)
+    }
+
+    return () => {
+      clearTimeout(timeout)
+      clearTimeout(iosTimeout)
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
+    }
   }, [])
 
   const install = async () => {

@@ -6,6 +6,8 @@ import Image from 'next/image'
 import { ArrowLeft, Upload, Link2, Trash2, Star, Sparkles, Loader2, Eye } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
+import { SkeletonForm } from '@/components/ui/Skeleton'
+import { useUnsavedChanges } from '@/lib/useUnsavedChanges'
 
 export default function EditProductPage() {
   const router = useRouter()
@@ -27,6 +29,8 @@ export default function EditProductPage() {
     price: '', compareAtPrice: '', status: 'PUBLISHED', deliveryMode: 'INMEDIATA', categoryId: '', stock: '0',
     active: true, featured: false, whatsappMessageOverride: '', metaTitle: '', metaDescription: '', metaKeywords: '', ogImageUrl: ''
   })
+
+  useUnsavedChanges(formData.name.length > 0 || formData.description.length > 0)
 
   const addSize = (size: string) => {
     setFormData(prev => ({
@@ -220,7 +224,7 @@ export default function EditProductPage() {
     }
   }
 
-  if (loading) return <div className="p-10 text-center text-text-secondary">Cargando...</div>
+  if (loading) return <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full"><SkeletonForm fields={10} /></div>
 
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full">

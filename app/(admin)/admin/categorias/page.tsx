@@ -1,9 +1,11 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import NextImage from 'next/image'
-import { Plus, Edit2, Trash2, X, Check, Loader2, Upload } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Check, Loader2, Upload, ChevronUp, ChevronDown } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { SkeletonTable } from '@/components/ui/Skeleton'
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<any[]>([])
@@ -129,6 +131,25 @@ export default function AdminCategoriesPage() {
       }
     } catch (err) { console.error('Delete category error:', err); toastError('Error al eliminar categoría.') }
     finally { setDeleting(null) }
+  }
+
+  const moveCategory = async (id: string, direction: 'up' | 'down') => {
+    const idx = categories.findIndex((c: any) => c.id === id)
+    if (idx < 0) return
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (targetIdx < 0 || targetIdx >= categories.length) return
+    const reordered = [...categories]
+    const temp = {...reordered[idx], sortOrder: reordered[targetIdx].sortOrder}
+    reordered[idx] = {...reordered[targetIdx], sortOrder: reordered[idx].sortOrder}
+    reordered[targetIdx] = temp
+    setCategories(reordered)
+    try {
+      await fetch('/api/categories/reorder', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: reordered.map((c: any) => c.id) }),
+      })
+    } catch { loadCategories() }
   }
 
   if (loading) return <div className="p-10 text-center text-text-secondary">Cargando categorías...</div>
@@ -302,7 +323,23 @@ export default function AdminCategoriesPage() {
                     </span>
                   </td>
                   <td className="p-4">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end gap-0.5">
+                      <button
+                        onClick={() => moveCategory(cat.id, 'up')}
+                        disabled={categories.indexOf(cat) === 0}
+                        className="p-1.5 text-text-secondary hover:text-white disabled:opacity-20 transition-colors rounded"
+                        title="Subir"
+                      >
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => moveCategory(cat.id, 'down')}
+                        disabled={categories.indexOf(cat) === categories.length - 1}
+                        className="p-1.5 text-text-secondary hover:text-white disabled:opacity-20 transition-colors rounded"
+                        title="Bajar"
+                      >
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </button>
                       <button
                         onClick={() => handleEdit(cat)}
                         className="p-2 text-text-secondary hover:text-accent transition-colors rounded-lg hover:bg-secondary"

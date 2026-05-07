@@ -1,8 +1,11 @@
 'use client'
 import React, { useState, useEffect } from 'react'
+import NextImage from 'next/image'
 import { useToast } from '@/components/ui/Toast'
-import { Megaphone, Plus, Trash2, Edit2, X } from 'lucide-react'
+import { Megaphone, Plus, Trash2, Edit2, X, ChevronUp, ChevronDown } from 'lucide-react'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { SkeletonTable } from '@/components/ui/Skeleton'
 
 export default function AdminBannersPage() {
   const [banners, setBanners] = useState<any[]>([])
@@ -82,7 +85,24 @@ export default function AdminBannersPage() {
     } catch (err) { console.error('Delete banner error:', err); toastError('Error al eliminar banner.') }
   }
 
-  if (loading) return <div className="p-10 text-center text-sm text-text-secondary">Cargando...</div>
+  const moveBanner = async (id: string, direction: 'up' | 'down') => {
+    const idx = banners.findIndex((b: any) => b.id === id)
+    if (idx < 0) return
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (targetIdx < 0 || targetIdx >= banners.length) return
+    const reordered = [...banners]
+    ;[reordered[idx], reordered[targetIdx]] = [reordered[targetIdx], reordered[idx]]
+    setBanners(reordered)
+    try {
+      await fetch('/api/banners/reorder', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: reordered.map((b: any) => b.id) }),
+      })
+    } catch { loadBanners() }
+  }
+
+  if (loading) return <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full"><SkeletonTable rows={3} cols={4} /></div>
 
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full">
@@ -153,6 +173,7 @@ export default function AdminBannersPage() {
           <thead>
             <tr className="bg-secondary text-text-secondary text-sm border-b border-border">
               <th className="p-4 font-medium">Título</th>
+              <th className="p-4 font-medium">Imagen</th>
               <th className="p-4 font-medium">Posición</th>
               <th className="p-4 font-medium">Estado</th>
               <th className="p-4 font-medium text-right">Acciones</th>
@@ -160,7 +181,7 @@ export default function AdminBannersPage() {
           </thead>
           <tbody>
             {banners.length === 0 ? (
-              <tr><td colSpan={4} className="p-8 text-center text-sm text-text-secondary">No hay banners.</td></tr>
+              <tr><td colSpan={4} className="p-0"><EmptyState variant="default" title="No hay banners" description="Creá tu primer banner promocional." className="py-8" /></td></tr>
             ) : banners.map((b) => (
               <tr key={b.id} className="border-b border-border hover:bg-secondary/50 transition-colors">
                 <td className="p-4 font-medium">{b.title}</td>
@@ -170,9 +191,17 @@ export default function AdminBannersPage() {
                     {b.active ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>
-                <td className="p-4 text-right flex justify-end gap-2">
-                  <button onClick={() => handleEdit(b)} className="p-2 text-text-secondary hover:text-accent transition-colors"><Edit2 className="w-4 h-4" /></button>
-                  <button onClick={() => handleDelete(b.id)} className="p-2 text-text-secondary hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                <td className="p-4 text-right">
+                  <div className="flex items-center justify-end gap-0.5">
+                    <button onClick={() => moveBanner(b.id, 'up')} disabled={banners.indexOf(b) === 0} className="p-1.5 text-text-secondary hover:text-white disabled:opacity-20 rounded" title="Subir">
+                      <ChevronUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => moveBanner(b.id, 'down')} disabled={banners.indexOf(b) === banners.length - 1} className="p-1.5 text-text-secondary hover:text-white disabled:opacity-20 rounded" title="Bajar">
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => handleEdit(b)} className="p-2 text-text-secondary hover:text-accent transition-colors"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete(b.id)} className="p-2 text-text-secondary hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </div>
                 </td>
               </tr>
             ))}

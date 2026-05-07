@@ -8,6 +8,7 @@ import { MobileNav } from '@/components/shop/MobileNav';
 import { WhatsAppButton } from '@/components/shop/WhatsAppButton';
 import { StoreAssurance } from '@/components/shop/StoreAssurance';
 import { MaintenanceScreen } from '@/components/shop/MaintenanceScreen';
+import { PublicLayoutClient } from '@/components/shop/PublicLayoutClient';
 import { Zap } from 'lucide-react';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -51,6 +52,7 @@ export default async function PublicLayout({ children }: { children: React.React
   const siteName = config?.siteName || 'SHOWROOM JR';
 
   return (
+    <PublicLayoutClient>
     <div className="flex flex-col min-h-screen bg-bg-primary text-text-primary">
       {/* Desktop navbar */}
       <Navbar config={config} />
@@ -110,5 +112,6 @@ export default async function PublicLayout({ children }: { children: React.React
       <MobileNav />
       {config?.whatsappButtonEnabled && <WhatsAppButton number={config.whatsappNumber} message={config.whatsappMessage} />}
     </div>
+    </PublicLayoutClient>
   );
 }

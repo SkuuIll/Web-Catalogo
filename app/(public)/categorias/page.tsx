@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, Grid2x2, Sparkles } from 'lucide-react';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export const revalidate = 60;
 
@@ -70,8 +71,8 @@ export default async function CategoriasPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 text-text-secondary bg-card/30 backdrop-blur-md rounded-xl border border-white/[0.06]">
-            <p className="text-xl">Aún no hay categorías disponibles.</p>
+          <div className="bg-card/30 backdrop-blur-md rounded-xl border border-white/[0.06]">
+            <EmptyState variant="categories" />
           </div>
         )}
       </div>
