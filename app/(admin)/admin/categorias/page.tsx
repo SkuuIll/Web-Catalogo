@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import NextImage from 'next/image'
-import { Plus, Edit2, Trash2, X, Check, Loader2, Upload, ChevronUp, ChevronDown } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Check, Loader2, Upload, ChevronUp, ChevronDown, Tag } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -152,7 +152,14 @@ export default function AdminCategoriesPage() {
     } catch { loadCategories() }
   }
 
-  if (loading) return <div className="p-10 text-center text-text-secondary">Cargando categorías...</div>
+  if (loading) return (
+    <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gradient">Categorías</h1>
+      </div>
+      <SkeletonTable rows={5} cols={5} />
+    </div>
+  )
 
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full">
@@ -278,8 +285,8 @@ export default function AdminCategoriesPage() {
         </div>
       )}
 
-      {/* Table */}
-      <div className="bg-card/60 border border-white/[0.06] rounded-xl overflow-hidden">
+      {/* Table: solo escritorio */}
+      <div className="hidden md:block bg-card/60 border border-white/[0.06] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -364,6 +371,81 @@ export default function AdminCategoriesPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile: vista de tarjetas */}
+      <div className="md:hidden flex flex-col gap-2">
+        {categories.length === 0 ? (
+          <div className="bg-card/60 border border-white/[0.06] rounded-xl p-8 text-center text-text-secondary text-sm">
+            No hay categorías registradas.
+          </div>
+        ) : categories.map((cat, idx) => (
+          <div
+            key={cat.id}
+            className="bg-card/60 border border-white/[0.06] rounded-xl p-4 active:scale-[0.98] transition-transform"
+          >
+            <div className="flex items-start gap-3">
+              {cat.imageUrl ? (
+                <div className="w-14 h-14 rounded-lg overflow-hidden bg-secondary border border-border flex-shrink-0">
+                  <NextImage src={cat.imageUrl} alt={cat.name} width={56} height={56} className="w-full h-full object-cover" unoptimized />
+                </div>
+              ) : (
+                <div className="w-14 h-14 rounded-lg bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                  <Tag className="w-6 h-6 text-text-secondary" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-bold text-white line-clamp-1">{cat.name}</h3>
+                  <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                    cat.active
+                      ? 'bg-green-500/15 text-green-400 border border-green-500/20'
+                      : 'bg-red-500/15 text-red-400 border border-red-500/20'
+                  }`}>
+                    {cat.active ? 'Activa' : 'Inactiva'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-text-secondary font-mono mt-0.5">{cat.slug}</p>
+                <p className="text-[11px] text-text-secondary mt-0.5">Orden: {cat.sortOrder}</p>
+                <p className="text-[11px] text-text-secondary/60 line-clamp-1 mt-0.5">{cat.description || 'Sin descripción'}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/[0.04]">
+              <div className="flex items-center gap-0.5">
+                <button
+                  onClick={() => moveCategory(cat.id, 'up')}
+                  disabled={idx === 0}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-white disabled:opacity-20 transition-colors hover:bg-white/[0.04]"
+                >
+                  <ChevronUp className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => moveCategory(cat.id, 'down')}
+                  disabled={idx === categories.length - 1}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-white disabled:opacity-20 transition-colors hover:bg-white/[0.04]"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handleEdit(cat)}
+                  className="px-3 py-2 text-xs font-medium text-accent bg-accent/10 rounded-lg hover:bg-accent/20 transition-colors"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => handleDelete(cat)}
+                  disabled={deleting === cat.id}
+                  className="px-3 py-2 text-xs font-medium text-red-400 bg-red-500/10 rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50 flex items-center gap-1"
+                >
+                  {deleting === cat.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                  {deleting === cat.id ? '' : 'Eliminar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

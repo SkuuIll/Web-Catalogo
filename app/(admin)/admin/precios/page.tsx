@@ -179,8 +179,8 @@ export default function AdminPricesPage() {
         {bulkMsg && <p className="mt-3 text-sm text-accent">{bulkMsg}</p>}
       </div>
 
-      {/* Price Table */}
-      <div className="bg-card/60 border border-white/[0.06] rounded-xl overflow-hidden">
+      {/* Price Table: desktop */}
+      <div className="hidden md:block bg-card/60 border border-white/[0.06] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -271,6 +271,58 @@ export default function AdminPricesPage() {
             <EmptyState variant="products" className="bg-card/60 border border-white/[0.06] rounded-xl" />
           )}
         </div>
+      </div>
+
+      {/* Price cards: mobile */}
+      <div className="md:hidden flex flex-col gap-2">
+        {products.length === 0 ? (
+          <EmptyState variant="products" className="bg-card/60 border border-white/[0.06] rounded-xl" />
+        ) : products.map(product => (
+          <div key={product.id} className={`bg-card/60 border rounded-xl p-4 active:scale-[0.98] transition-transform ${selectedIds.has(product.id) ? 'border-accent/30 bg-accent/[0.04]' : 'border-white/[0.06]'}`}>
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex items-start gap-2 min-w-0">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(product.id)}
+                  onChange={() => toggleSelect(product.id)}
+                  className="w-5 h-5 accent-accent mt-0.5 flex-shrink-0"
+                />
+                <div>
+                  <h3 className="text-sm font-bold text-white line-clamp-1">{product.name}</h3>
+                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-accent/10 text-accent border border-accent/15 inline-block mt-1">
+                    {product.category?.name || '-'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/[0.04]">
+              <div>
+                <p className="text-[10px] text-text-secondary uppercase tracking-wider mb-0.5">Precio</p>
+                {editingId === product.id ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-text-secondary text-xs">$</span>
+                    <input type="number" value={editValue} onChange={e => setEditValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') savePrice(product.id); if (e.key === 'Escape') cancelEdit() }} autoFocus className="w-24 bg-secondary border border-accent rounded px-2 py-1 text-sm focus:outline-none" />
+                    <button onClick={() => savePrice(product.id)} disabled={!!savingId} className="p-1 text-green-400">{savingId === product.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}</button>
+                    <button onClick={cancelEdit} className="p-1 text-red-400"><X className="w-3.5 h-3.5" /></button>
+                  </div>
+                ) : (
+                  <button onClick={() => startEdit(product)} className="text-base font-black text-accent flex items-center gap-1">
+                    {formatPriceARS(Number(product.price))}
+                    <span className="text-[10px] text-text-secondary font-normal">tocar</span>
+                  </button>
+                )}
+              </div>
+              <div>
+                <p className="text-[10px] text-text-secondary uppercase tracking-wider mb-0.5">Anterior</p>
+                <p className="text-sm text-text-secondary">{product.compareAtPrice ? formatPriceARS(Number(product.compareAtPrice)) : '-'}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-text-secondary uppercase tracking-wider mb-0.5">Stock</p>
+                <p className={`text-sm font-bold ${product.stock > 0 ? 'text-green-400' : 'text-red-400'}`}>{product.stock > 0 ? product.stock : 'Agotado'}</p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import NextImage from 'next/image'
 import { useToast } from '@/components/ui/Toast'
 import { SkeletonForm } from '@/components/ui/Skeleton'
+import { useAdvancedMode } from '@/components/admin/AdvancedModeProvider'
 import {
   BadgeCheck,
   Bot,
@@ -18,6 +19,7 @@ import {
   ShieldCheck,
   Upload,
   X,
+  ChevronDown, ChevronUp,
 } from 'lucide-react'
 
 const tabs = [
@@ -33,12 +35,17 @@ const tabs = [
 ]
 
 export default function ConfigPage() {
+  const { isAdvanced } = useAdvancedMode()
   const [config, setConfig] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState('general')
   const [saved, setSaved] = useState(false)
   const { success, error: toastError } = useToast()
+
+  const visibleTabs = isAdvanced
+    ? tabs
+    : tabs.filter(t => ['general', 'apariencia', 'whatsapp'].includes(t.id))
 
   useEffect(() => {
     fetch('/api/config?admin=true').then(r => r.json()).then(data => { setConfig(data); setLoading(false) }).catch(() => setLoading(false))
@@ -63,7 +70,7 @@ export default function ConfigPage() {
 
   if (loading) return <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full"><SkeletonForm fields={8} /></div>
 
-  const activeTabMeta = tabs.find(tab => tab.id === activeTab) || tabs[0]
+  const activeTabMeta = visibleTabs.find(tab => tab.id === activeTab) || visibleTabs[0]
   const ActiveIcon = activeTabMeta.icon
 
   const Field = ({ label, name, type = 'text', placeholder = '', rows, help }: { label: string; name: string; type?: string; placeholder?: string; rows?: number; help?: string }) => (
@@ -141,11 +148,11 @@ export default function ConfigPage() {
 
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full">
-      <div className="sticky top-0 md:top-0 z-20 -mx-4 mb-6 border-b border-border bg-bg-primary/90 px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6 md:-mx-10 md:px-10">
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+      <div className="sticky top-0 z-20 -mx-4 mb-6 border-b border-border bg-bg-primary/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 md:-mx-10 md:px-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
         <div className="min-w-0">
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gradient mb-1">Configuración Global</h1>
-          <p className="text-sm text-text-secondary">Control central de tienda, contenido, SEO, IA y mantenimiento.</p>
+          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gradient mb-1">Configuración</h1>
+          <p className="text-sm text-text-secondary">Ajustes de la tienda, WhatsApp, SEO y más.</p>
         </div>
         <button onClick={handleSave} disabled={saving} className="w-full sm:w-auto justify-center bg-accent hover:bg-accent-hover text-black font-bold py-2.5 px-6 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -157,14 +164,14 @@ export default function ConfigPage() {
       <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
       <div className="lg:sticky lg:top-28 lg:self-start">
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 lg:flex-col lg:overflow-visible">
-        {tabs.map(tab => (
+        {visibleTabs.map(tab => (
           (() => {
             const Icon = tab.icon
             return (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`min-w-[180px] lg:min-w-0 text-left rounded-lg border px-4 py-3 transition-colors ${
+            className={`min-w-[150px] lg:min-w-0 text-left rounded-lg border px-3 py-2.5 transition-colors ${
               activeTab === tab.id ? 'border-accent/40 bg-accent/10 text-white' : 'border-white/[0.06] bg-card/40 text-text-secondary hover:border-white/20 hover:text-white'
             }`}
           >

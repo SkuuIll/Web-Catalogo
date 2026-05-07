@@ -168,7 +168,8 @@ export default function AdminBannersPage() {
       )}
 
       <div className="bg-card/60 border border-white/[0.06] rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop table */}
+        <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left">
           <thead>
             <tr className="bg-secondary text-text-secondary text-sm border-b border-border">
@@ -207,6 +208,48 @@ export default function AdminBannersPage() {
             ))}
           </tbody>
         </table>
+        </div>
+
+        {/* Mobile cards */}
+        <div className="md:hidden flex flex-col gap-2 p-2">
+          {banners.length === 0 ? (
+            <EmptyState variant="default" title="No hay banners" description="Creá tu primer banner." className="py-8" />
+          ) : banners.map((b, idx) => (
+            <div key={b.id} className="bg-card/60 border border-white/[0.06] rounded-xl p-4 active:scale-[0.98] transition-transform">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-white line-clamp-1">{b.title}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[11px] px-1.5 py-0.5 rounded bg-accent/10 text-accent border border-accent/15">{b.position}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                      b.active ? 'bg-green-500/15 text-green-400 border border-green-500/20' : 'bg-red-500/15 text-red-400 border border-red-500/20'
+                    }`}>
+                      {b.active ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </div>
+                  {b.imageUrl && (
+                    <div className="mt-2 w-full h-20 rounded-lg overflow-hidden bg-secondary border border-border">
+                      <NextImage src={b.imageUrl} alt={b.title} width={200} height={80} className="w-full h-full object-cover" unoptimized />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-3 border-t border-white/[0.04]">
+                <div className="flex items-center gap-0.5">
+                  <button onClick={() => moveBanner(b.id, 'up')} disabled={idx === 0} className="w-8 h-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-white disabled:opacity-20 transition-colors hover:bg-white/[0.04]">
+                    <ChevronUp className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => moveBanner(b.id, 'down')} disabled={idx === banners.length - 1} className="w-8 h-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-white disabled:opacity-20 transition-colors hover:bg-white/[0.04]">
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => handleEdit(b)} className="px-3 py-2 text-xs font-medium text-accent bg-accent/10 rounded-lg hover:bg-accent/20 transition-colors">Editar</button>
+                  <button onClick={() => handleDelete(b.id)} className="px-3 py-2 text-xs font-medium text-red-400 bg-red-500/10 rounded-lg hover:bg-red-500/20 transition-colors">Eliminar</button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
