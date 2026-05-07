@@ -38,12 +38,12 @@ pm2 startup systemd -u root --hp /root || true
 env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u root --hp /root || true
 
 echo "Configuring Nginx..."
-mv /root/showjr.store.conf /etc/nginx/sites-available/showjr.store || true
-ln -sf /etc/nginx/sites-available/showjr.store /etc/nginx/sites-enabled/
+cp /root/Web-Catalogo/nginx.conf /etc/nginx/sites-available/shwrmjr.pro || true
+ln -sf /etc/nginx/sites-available/shwrmjr.pro /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 systemctl reload nginx
 
 echo "Setting up SSL with Certbot..."
-certbot --nginx -d showjr.store -d www.showjr.store --non-interactive --agree-tos -m admin@showjr.store || true
+certbot --nginx -d shwrmjr.pro -d www.shwrmjr.pro --non-interactive --agree-tos -m admin@shwrmjr.pro || true
 
 echo "Deployment finished!"
