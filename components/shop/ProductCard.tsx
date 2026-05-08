@@ -4,7 +4,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { formatPriceARS } from '@/lib/price-formatter'
 import { generateProductWhatsAppMessage } from '@/lib/whatsapp'
-import { MessageCircle, Tag, Eye } from 'lucide-react'
+import { MessageCircle, Tag, Eye, ShoppingBag } from 'lucide-react'
+import { useCartStore } from '@/store/cartStore'
 
 export function ProductCard({ product, config }: { product: any, config: any }) {
   const price = formatPriceARS(Number(product.price));
@@ -12,6 +13,7 @@ export function ProductCard({ product, config }: { product: any, config: any }) 
   const imageUrl = primaryImage ? primaryImage.url : '/placeholder.png';
   const hasDiscount = product.compareAtPrice && Number(product.compareAtPrice) > Number(product.price);
   const discount = hasDiscount ? Math.round((1 - Number(product.price) / Number(product.compareAtPrice)) * 100) : 0;
+  const addItem = useCartStore((state) => state.addItem);
 
   const handleWA = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -106,16 +108,28 @@ export function ProductCard({ product, config }: { product: any, config: any }) 
         </div>
       </Link>
 
-      {/* WhatsApp CTA */}
-      {config?.whatsappNumber && (
+      {/* CTAs */}
+      <div className="mx-3 mb-3 flex items-center gap-2 md:opacity-0 md:translate-y-1 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
         <button
-          onClick={handleWA}
-          className="mx-3 mb-3 inline-flex items-center justify-center gap-2 rounded-lg border border-accent/20 bg-accent/[0.07] px-3 py-2 text-xs font-bold text-accent transition-all duration-300 hover:bg-accent hover:text-black hover:border-accent md:opacity-0 md:translate-y-1 md:group-hover:opacity-100 md:group-hover:translate-y-0 md:focus-within:opacity-100 md:focus-within:translate-y-0 md:focus-visible:opacity-100 md:focus-visible:translate-y-0"
+          onClick={(e) => {
+            e.preventDefault();
+            addItem({ productId: product.id, name: product.name, price: Number(product.price), imageUrl, slug: product.slug });
+          }}
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-accent/20 bg-accent/[0.07] px-3 py-2 text-xs font-bold text-accent transition-colors hover:bg-accent hover:text-black hover:border-accent"
         >
-          <MessageCircle className="w-3.5 h-3.5" />
-          Consultar
+          <ShoppingBag className="w-3.5 h-3.5" />
+          Agregar
         </button>
-      )}
+        {config?.whatsappNumber && (
+          <button
+            onClick={handleWA}
+            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-lg border border-white/10 bg-white/5 text-text-secondary hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-colors"
+            title="Consultar directo"
+          >
+            <MessageCircle className="w-4 h-4" />
+          </button>
+        )}
+      </div>
     </div>
   )
 }

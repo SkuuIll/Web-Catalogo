@@ -9,6 +9,7 @@ import { WhatsAppButton } from '@/components/shop/WhatsAppButton';
 import { StoreAssurance } from '@/components/shop/StoreAssurance';
 import { MaintenanceScreen } from '@/components/shop/MaintenanceScreen';
 import { PublicLayoutClient } from '@/components/shop/PublicLayoutClient';
+import { CartDrawer } from '@/components/shop/CartDrawer';
 import { Zap } from 'lucide-react';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -114,6 +115,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
       <MobileNav />
       {config?.whatsappButtonEnabled && <WhatsAppButton number={config.whatsappNumber} message={config.whatsappMessage} />}
+      <CartDrawer whatsappNumber={config?.whatsappNumber} />
     </div>
     </PublicLayoutClient>
   );

@@ -4,13 +4,18 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import NextImage from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Search, Zap, ChevronRight } from 'lucide-react'
+import { Search, Zap, ShoppingBag } from 'lucide-react'
+import { useCartStore } from '@/store/cartStore'
 
 export function Navbar({ config }: { config: any }) {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
+  const { items, setIsOpen } = useCartStore()
+  const itemCount = items.reduce((acc, item) => acc + item.quantity, 0)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
@@ -83,6 +88,18 @@ export function Navbar({ config }: { config: any }) {
           >
             <Search className="w-[18px] h-[18px]" />
           </Link>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="relative group flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-accent hover:bg-accent/[0.08] hover:border-accent/25 transition-all duration-300"
+            aria-label="Abrir carrito"
+          >
+            <ShoppingBag className="w-[18px] h-[18px]" />
+            {mounted && itemCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-accent text-black text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                {itemCount}
+              </span>
+            )}
+          </button>
         </div>
       </div>
     </header>

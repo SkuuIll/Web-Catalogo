@@ -8,6 +8,7 @@ import { generateProductWhatsAppMessage } from '@/lib/whatsapp';
 import { ProductCard } from '@/components/shop/ProductCard';
 import { WhatsAppTrackedLink } from '@/components/shop/WhatsAppTrackedLink';
 import { ProductGallery } from '@/components/shop/ProductGallery';
+import { AddToCartButton } from '@/components/shop/AddToCartButton';
 import { headers } from 'next/headers';
 import type { Metadata } from 'next';
 
@@ -245,9 +246,13 @@ export default async function ProductoPage({ params }: { params: { slug: string 
                     )}
                   </div>
                 </div>
-
                 {config?.whatsappNumber ? (
-                  <WhatsAppTrackedLink href={waUrl} productId={product.id} />
+                  <div className="flex flex-col gap-3">
+                    <AddToCartButton 
+                      product={{ id: product.id, name: product.name, price: Number(product.price), imageUrl, slug: product.slug }} 
+                    />
+                    <WhatsAppTrackedLink href={waUrl} productId={product.id} />
+                  </div>
                 ) : (
                   <button disabled className="w-full bg-secondary text-text-secondary font-bold py-5 px-8 rounded-xl cursor-not-allowed border border-white/[0.06]">
                     Ventas pausadas momentáneamente
