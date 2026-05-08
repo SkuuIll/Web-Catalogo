@@ -20,11 +20,20 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   });
   if (!product) return {};
   const primaryImage = product.ogImageUrl || product.images?.find((img) => img.isPrimary)?.url || product.images?.[0]?.url;
+  const appUrl = process.env.NEXTAUTH_URL || 'https://shwrmjr.pro';
+
   return {
+    metadataBase: new URL(appUrl),
     title: product.metaTitle || product.name,
     description: product.metaDescription || product.shortDescription || undefined,
     keywords: product.metaKeywords || undefined,
     openGraph: {
+      title: product.metaTitle || product.name,
+      description: product.metaDescription || product.shortDescription || undefined,
+      images: primaryImage ? [primaryImage] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
       title: product.metaTitle || product.name,
       description: product.metaDescription || product.shortDescription || undefined,
       images: primaryImage ? [primaryImage] : undefined,

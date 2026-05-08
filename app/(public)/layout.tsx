@@ -18,7 +18,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = config?.metaDescription || config?.siteSlogan || 'Catálogo de productos con consultas rápidas por WhatsApp.';
   const images = config?.bannerImageUrl || config?.heroImageUrl ? [config.bannerImageUrl || config.heroImageUrl || ''] : undefined;
 
+  const appUrl = process.env.NEXTAUTH_URL || 'https://shwrmjr.pro';
+
   return {
+    metadataBase: new URL(appUrl),
     title: {
       default: title,
       template: `%s | ${siteName}`,

@@ -8,11 +8,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Grid2x2, Sparkles, Zap } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { BannerCarousel } from '@/components/shop/BannerCarousel';
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [config, productCount, categoryCount, categories] = await Promise.all([
+  const [config, productCount, categoryCount, categories, banners] = await Promise.all([
     prisma.siteConfig.findFirst(),
     prisma.product.count({ where: { active: true } }),
     prisma.category.count({ where: { active: true } }),
@@ -21,6 +22,10 @@ export default async function HomePage() {
       include: { _count: { select: { products: { where: { active: true, status: 'PUBLISHED' } } } } },
       orderBy: { sortOrder: 'asc' },
       take: 6,
+    }),
+    prisma.banner.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: 'asc' }
     }),
   ]);
 
@@ -44,6 +49,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <BannerCarousel banners={banners} position="HERO" />
       <HeroSection
         title={config?.heroTitle || null}
         subtitle={config?.heroSubtitle || null}
@@ -90,6 +96,10 @@ export default async function HomePage() {
         </section>
       )}
 
+      <div className="container mx-auto px-4 py-4">
+        <BannerCarousel banners={banners} position="MIDDLE" />
+      </div>
+
       {/* Products Section */}
       <section className="py-12 md:py-20 container mx-auto px-4">
         <div className="mb-8 flex items-end justify-between gap-4">
@@ -120,6 +130,10 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      <div className="container mx-auto px-4 pb-8">
+        <BannerCarousel banners={banners} position="FOOTER" />
+      </div>
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 pb-14 md:pb-20">
